@@ -18,6 +18,7 @@ public class XX_Fiche implements InterfaceFiche{
     public int idEntreprise;
     public int idUtilisateur;
     public int idExercice;
+    public int idMonnaie;
     public int idAgent;
     public int categorieAgent;
     public double salaireBase;
@@ -35,11 +36,12 @@ public class XX_Fiche implements InterfaceFiche{
     public String mois;
     public int beta;
 
-    public XX_Fiche(int id, int idEntreprise, int idUtilisateur, int idExercice, int idAgent, int categorieAgent, double salaireBase, double transport, double logement, double autresGains, double retenu_IPR, double retenu_INSS, double retenu_SYNDICAT, double retenu_ABSENCE, double retenu_CAFETARIAT, double retenu_AVANCE_SALAIRE, double retenu_ORDINATEUR, Date dateEnregistrement, String mois, int beta) {
+    public XX_Fiche(int id, int idEntreprise, int idUtilisateur, int idExercice, int idMonnaie, int idAgent, int categorieAgent, double salaireBase, double transport, double logement, double autresGains, double retenu_IPR, double retenu_INSS, double retenu_SYNDICAT, double retenu_ABSENCE, double retenu_CAFETARIAT, double retenu_AVANCE_SALAIRE, double retenu_ORDINATEUR, Date dateEnregistrement, String mois, int beta) {
         this.id = id;
         this.idEntreprise = idEntreprise;
         this.idUtilisateur = idUtilisateur;
         this.idExercice = idExercice;
+        this.idMonnaie = idMonnaie;
         this.idAgent = idAgent;
         this.categorieAgent = categorieAgent;
         this.salaireBase = salaireBase;
@@ -57,6 +59,16 @@ public class XX_Fiche implements InterfaceFiche{
         this.mois = mois;
         this.beta = beta;
     }
+
+    public int getIdMonnaie() {
+        return idMonnaie;
+    }
+
+    public void setIdMonnaie(int idMonnaie) {
+        this.idMonnaie = idMonnaie;
+    }
+
+    
 
     public int getIdAgent() {
         return idAgent;
@@ -226,6 +238,6 @@ public class XX_Fiche implements InterfaceFiche{
 
     @Override
     public String toString() {
-        return "TEST_Fiche{" + "id=" + id + ", idEntreprise=" + idEntreprise + ", idUtilisateur=" + idUtilisateur + ", idExercice=" + idExercice + ", idAgent=" + idAgent + ", categorieAgent=" + categorieAgent + ", salaireBase=" + salaireBase + ", transport=" + transport + ", logement=" + logement + ", autresGains=" + autresGains + ", retenu_IPR=" + retenu_IPR + ", retenu_INSS=" + retenu_INSS + ", retenu_SYNDICAT=" + retenu_SYNDICAT + ", retenu_ABSENCE=" + retenu_ABSENCE + ", retenu_CAFETARIAT=" + retenu_CAFETARIAT + ", retenu_AVANCE_SALAIRE=" + retenu_AVANCE_SALAIRE + ", retenu_ORDINATEUR=" + retenu_ORDINATEUR + ", dateEnregistrement=" + dateEnregistrement + ", mois=" + mois + ", beta=" + beta + '}';
+        return "XX_Fiche{" + "id=" + id + ", idEntreprise=" + idEntreprise + ", idUtilisateur=" + idUtilisateur + ", idExercice=" + idExercice + ", idMonnaie=" + idMonnaie + ", idAgent=" + idAgent + ", categorieAgent=" + categorieAgent + ", salaireBase=" + salaireBase + ", transport=" + transport + ", logement=" + logement + ", autresGains=" + autresGains + ", retenu_IPR=" + retenu_IPR + ", retenu_INSS=" + retenu_INSS + ", retenu_SYNDICAT=" + retenu_SYNDICAT + ", retenu_ABSENCE=" + retenu_ABSENCE + ", retenu_CAFETARIAT=" + retenu_CAFETARIAT + ", retenu_AVANCE_SALAIRE=" + retenu_AVANCE_SALAIRE + ", retenu_ORDINATEUR=" + retenu_ORDINATEUR + ", dateEnregistrement=" + dateEnregistrement + ", mois=" + mois + ", beta=" + beta + '}';
     }
 }

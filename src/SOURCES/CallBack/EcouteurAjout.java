@@ -5,14 +5,12 @@
  */
 package SOURCES.CallBack;
 
-import SOURCES.ModelsTable.ModeleListeDecaissement;
-import SOURCES.ModelsTable.ModeleListeEncaissement;
+import SOURCES.ModelsTables.ModeleListeFiches;
 
 /**
  *
  * @author HP Pavilion
  */
 public abstract class EcouteurAjout {
-    public abstract void setAjoutEncaissement(ModeleListeEncaissement modeleListeEncaissement);
-    public abstract void setAjoutDecaissement(ModeleListeDecaissement modeleListeDecaissement);
+    public abstract void setAjoutFiche(ModeleListeFiches modeleListeFiches);
 }

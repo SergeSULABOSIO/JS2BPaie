@@ -5,6 +5,7 @@
  */
 package SOURCES.Utilitaires;
 
+import SOURCES.Interface.InterfaceFiche;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -33,6 +34,26 @@ public class Util {
             e.printStackTrace();
         }
         return texte;
+    }
+    
+    public static double getTotalAPayer(InterfaceFiche Ifiche){
+        if(Ifiche != null){
+            return (Ifiche.getSalaireBase() + Ifiche.getTransport() + Ifiche.getLogement() + Ifiche.getAutresGains());
+        }else{
+            return 0;
+        }
+    }
+    
+    public static double getTotalRetenu(InterfaceFiche Ifiche){
+        if(Ifiche != null){
+            return (Ifiche.getRetenu_IPR() + Ifiche.getRetenu_INSS()+ Ifiche.getRetenu_SYNDICAT() + Ifiche.getRetenu_ABSENCE()+ Ifiche.getRetenu_CAFETARIAT() + Ifiche.getRetenu_AVANCE_SALAIRE() + Ifiche.getRetenu_ORDINATEUR());
+        }else{
+            return 0;
+        }
+    }
+    
+    public static double getNetAPayer(InterfaceFiche Ifiche){
+        return getTotalAPayer(Ifiche) - getTotalRetenu(Ifiche);
     }
 
     public static double getNombre_jours(Date dateFin, Date dateDebut) {
@@ -80,6 +101,20 @@ public class Util {
 
         return dateS;
     }
+    
+    public static String getDateFrancais_Mois(Date date) {
+        String dateS = "";
+        try {
+            String pattern = "MMMM YYYY";
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+            dateS = simpleDateFormat.format(date);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dateS;
+    }
+    
 
     public static String getMontantFrancais(double montant) {
         String val = "";
@@ -119,5 +154,8 @@ public class Util {
         String res = Util.getMontantFrancais(origine);
         System.out.println("Résultat = " + res);
         System.out.println("Résultat = " + Util.getMontantLettres(origine, "Dollars Américains"));
+        
+        System.out.println("Mois: " + Util.getDateFrancais(new Date()));
+        System.out.println("Mois: " + Util.getDateFrancais_Mois(new Date()));
     }
 }

@@ -5,12 +5,14 @@
  */
 package SOURCES.CallBack;
 
+import SOURCES.Utilitaires.SortiesFichesDePaies;
+
 
 /**
  *
  * @author HP Pavilion
  */
 public abstract class EcouteurPaie {
-    public abstract void onEnregistre(SortiesTresorerie sortiesTresorerie);
+    public abstract void onEnregistre(SortiesFichesDePaies sortiesTresorerie);
     
 }

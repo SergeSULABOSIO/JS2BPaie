@@ -22,6 +22,7 @@ public interface InterfaceFiche {
     public abstract int getIdEntreprise();
     public abstract int getIdUtilisateur();
     public abstract int getIdExercice();
+    public abstract int getIdMonnaie();
     public abstract int getIdAgent();
     public abstract int getCategorieAgent();
     public abstract double getSalaireBase();
@@ -43,6 +44,7 @@ public interface InterfaceFiche {
     public abstract void setIdEntreprise(int idEntreprise);
     public abstract void setIdUtilisateur(int idUtilisateur);
     public abstract void setIdExercice(int idExercice);
+    public abstract void setIdMonnaie(int idMonnaie);
     public abstract void setIdAgent(int idAgent);
     public abstract void setCategorieAgent(int categorieAgent);
     public abstract void setSalaireBase(double salaireBase);

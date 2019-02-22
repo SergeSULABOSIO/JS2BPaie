@@ -10,6 +10,7 @@ import BEAN_BARRE_OUTILS.Bouton;
 import BEAN_MenuContextuel.RubriqueSimple;
 import SOURCES.CallBack.EcouteurValeursChangees;
 import SOURCES.Interface.InterfaceFiche;
+import SOURCES.Utilitaires.Util;
 import java.awt.Color;
 import java.util.Date;
 import java.util.Vector;
@@ -23,7 +24,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class ModeleListeFiches extends AbstractTableModel {
 
-    private String[] titreColonnes = {"N°", "Date", "Mois", "Agent", "Catégorie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+    private String[] titreColonnes = {"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
     private Vector<InterfaceFiche> listeData = new Vector<>();
     private Vector<InterfaceFiche> listeDataExclus = new Vector<>();
     private JScrollPane parent;
@@ -217,29 +218,9 @@ public class ModeleListeFiches extends AbstractTableModel {
         return titreColonnes[column];
     }
     
-    private double getTotalAPayer(InterfaceFiche Ifiche){
-        if(Ifiche != null){
-            return (Ifiche.getSalaireBase() + Ifiche.getTransport() + Ifiche.getLogement() + Ifiche.getAutresGains());
-        }else{
-            return 0;
-        }
-    }
-    
-    private double getTotalRetenu(InterfaceFiche Ifiche){
-        if(Ifiche != null){
-            return (Ifiche.getRetenu_IPR() + Ifiche.getRetenu_INSS()+ Ifiche.getRetenu_SYNDICAT() + Ifiche.getRetenu_ABSENCE()+ Ifiche.getRetenu_CAFETARIAT() + Ifiche.getRetenu_AVANCE_SALAIRE() + Ifiche.getRetenu_ORDINATEUR());
-        }else{
-            return 0;
-        }
-    }
-    
-    private double getNetAPayer(InterfaceFiche Ifiche){
-        return getTotalAPayer(Ifiche) - getTotalRetenu(Ifiche);
-    }
-
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
         InterfaceFiche Ifiche = listeData.elementAt(rowIndex);
         switch (columnIndex) {
             case 0: //N°
@@ -252,32 +233,34 @@ public class ModeleListeFiches extends AbstractTableModel {
                 return Ifiche.getIdAgent();
             case 4: //Catégorie
                 return Ifiche.getCategorieAgent();
-            case 5: //Salaire de base(+)
+            case 5: //Monnaie
+                return Ifiche.getCategorieAgent();
+            case 6: //Salaire de base(+)
                 return Ifiche.getSalaireBase();
-            case 6: //Transport(+)
+            case 7: //Transport(+)
                 return Ifiche.getTransport();
-            case 7: //Logement(+)
+            case 8: //Logement(+)
                 return Ifiche.getLogement();
-            case 8: //Autres gains(+)
+            case 9: //Autres gains(+)
                 return Ifiche.getAutresGains();
-            case 9: //TOTAL (+)
-                return getTotalAPayer(Ifiche);
-            case 10: //IPR(-)
+            case 10: //TOTAL (+)
+                return Util.getTotalAPayer(Ifiche);
+            case 11: //IPR(-)
                 return Ifiche.getRetenu_IPR();
-            case 11: //INSS(-)
+            case 12: //INSS(-)
                 return Ifiche.getRetenu_INSS();
-            case 12: //SYNDICAT(-)
+            case 13: //SYNDICAT(-)
                 return Ifiche.getRetenu_SYNDICAT();
-            case 13: //CAFETARIAT(-)
+            case 14: //CAFETARIAT(-)
                 return Ifiche.getRetenu_CAFETARIAT();
-            case 14: //AVANCE SUR SALAIRE(-)
+            case 15: //AVANCE SUR SALAIRE(-)
                 return Ifiche.getRetenu_AVANCE_SALAIRE();
-            case 15: //ORDINATEUR(-)
+            case 16: //ORDINATEUR(-)
                 return Ifiche.getRetenu_ORDINATEUR();
-            case 16: //TOTAL(-)
-                return getTotalRetenu(Ifiche);
-            case 17: //NET A PAYER
-                return getNetAPayer(Ifiche);
+            case 17: //TOTAL(-)
+                return Util.getTotalRetenu(Ifiche);
+            case 18: //NET A PAYER
+                return Util.getNetAPayer(Ifiche);
             default:
                 return "Null";
         }
@@ -285,7 +268,7 @@ public class ModeleListeFiches extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
         switch (columnIndex) {
             case 0: //N°
                 return Integer.class;
@@ -297,31 +280,33 @@ public class ModeleListeFiches extends AbstractTableModel {
                 return Integer.class;
             case 4: //Catégorie
                 return Integer.class;
-            case 5: //Salaire de base(+)
+            case 5: //Monnaie
+                return Integer.class;
+            case 6: //Salaire de base(+)
                 return Double.class;
-            case 6: //Transport(+)
+            case 7: //Transport(+)
                 return Double.class;
-            case 7: //Logement(+)
+            case 8: //Logement(+)
                 return Double.class;
-            case 8: //Autres gains(+)
+            case 9: //Autres gains(+)
                 return Double.class;
-            case 9: //TOTAL (+)
+            case 10: //TOTAL(+)
                 return Double.class;
-            case 10: //IPR(-)
+            case 11: //IPR(-)
                 return Double.class;
-            case 11: //INSS(-)
+            case 12: //INSS(-)
                 return Double.class;
-            case 12: //SYNDICAT(-)
+            case 13: //SYNDICAT(-)
                 return Double.class;
-            case 13: //CAFETARIAT(-)
+            case 14: //CAFETARIAT(-)
                 return Double.class;
-            case 14: //AVANCE SUR SALAIRE(-)
+            case 15: //AVANCE SUR SALAIRE(-)
                 return Double.class;
-            case 15: //ORDINATEUR(-)
+            case 16: //ORDINATEUR(-)
                 return Double.class;
-            case 16: //TOTAL(-)
+            case 17: //TOTAL(-)
                 return Double.class;
-            case 17: //NET A PAYER
+            case 18: //NET A PAYER
                 return Double.class;
             default:
                 return Object.class;
@@ -330,7 +315,8 @@ public class ModeleListeFiches extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        if(columnIndex == 0 || columnIndex == 4 || columnIndex == 9 || columnIndex == 16 || columnIndex == 17){
+        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+        if(columnIndex == 0 || columnIndex == 4 || columnIndex == 10 || columnIndex == 17 || columnIndex == 18){
             return false;
         }else{
             return true;
@@ -339,47 +325,50 @@ public class ModeleListeFiches extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
         InterfaceFiche Ifiche = listeData.get(rowIndex);
         String avant = Ifiche.toString();
         switch (columnIndex) {
-            case 1:
+            case 1://Date
                 Ifiche.setDateEnregistrement((Date) aValue);
                 break;
-            case 2:
+            case 2://Mois
                 Ifiche.setMois(aValue + "");
                 break;
-            case 3:
+            case 3://Agent
                 Ifiche.setIdAgent(Integer.parseInt(aValue + ""));
                 break;
-            case 5:
+            case 5://Monnaie
+                Ifiche.setIdMonnaie(Integer.parseInt(aValue + ""));
+                break;
+            case 6://Salaire de base
                 Ifiche.setSalaireBase(Double.parseDouble(aValue + ""));
                 break;
-            case 6:
+            case 7://Transport
                 Ifiche.setTransport(Double.parseDouble(aValue + ""));
                 break;
-            case 7:
+            case 8://Logement
                 Ifiche.setLogement(Double.parseDouble(aValue + ""));
                 break;
-            case 8:
+            case 9://Autres gains
                 Ifiche.setAutresGains(Double.parseDouble(aValue + ""));
                 break;
-            case 10:
+            case 11://IPR
                 Ifiche.setRetenu_IPR(Double.parseDouble(aValue + ""));
                 break;
-            case 11:
+            case 12://INSS
                 Ifiche.setRetenu_INSS(Double.parseDouble(aValue + ""));
                 break;
-            case 12:
+            case 13://Syndicat
                 Ifiche.setRetenu_SYNDICAT(Double.parseDouble(aValue + ""));
                 break;
-            case 13:
+            case 14://CAfétariat
                 Ifiche.setRetenu_CAFETARIAT(Double.parseDouble(aValue + ""));
                 break;
-            case 14:
+            case 15://Avance sur Salaire
                 Ifiche.setRetenu_AVANCE_SALAIRE(Double.parseDouble(aValue + ""));
                 break;
-            case 15:
+            case 16://Ordinateur
                 Ifiche.setRetenu_ORDINATEUR(Double.parseDouble(aValue + ""));
                 break;
             default:
