@@ -42,7 +42,9 @@ public class ModeleListeFiches extends AbstractTableModel {
         this.parametreFichesDePaie = parametreFichesDePaie;
     }
 
-    /*
+    /* */
+    
+    
     public void chercher(Date dateA, Date dateB, String motcle, int idMonnaie, int idDestination, int idRevenu) {
         this.listeData.addAll(this.listeDataExclus);
         this.listeDataExclus.removeAllElements();
@@ -130,7 +132,7 @@ public class ModeleListeFiches extends AbstractTableModel {
     }
     
     
-     */
+    
     public void setListeFiches(Vector<InterfaceFiche> listeData) {
         this.listeData = listeData;
         redessinerTable();

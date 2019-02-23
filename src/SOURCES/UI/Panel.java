@@ -100,7 +100,7 @@ public class Panel extends javax.swing.JPanel {
         setIconesTabs();
 
         initMonnaieTotaux();
-        actualiserTotalNetAPayer();
+        actualiserTotaux();
         activerCriteres();
 
         initComposantsMoteursRecherche();
@@ -145,24 +145,18 @@ public class Panel extends javax.swing.JPanel {
     }
 
     private void activerMoteurRecherche() {
-        /* */
         gestionnaireRecherche = new MoteurRecherche(icones, chRecherche, ecouteurClose) {
-
+            
             @Override
             public void chercher(String motcle) {
                 //On extrait les critère de filtrage des Encaissements
 
-                /*
-                
                 int idcategorie = getCategorie(chCategorie.getSelectedItem() + "");
                 
                 //ModeleListeFiches.chercher(chDateAEnc.getDate(), chDateBEnc.getDate(), motcle, idMonnaie, idDest, idRevenu);
                 
-                actualiserTotalDecaissement();
-                actualiserTotalEncaissement();
+                actualiserTotaux();
                 actualiserTotaux("activerMoteurRecherche");
-                
-                 */
             }
         };
 
@@ -254,7 +248,7 @@ public class Panel extends javax.swing.JPanel {
         }
     }
 
-    private void actualiserTotalNetAPayer() {
+    private void actualiserTotaux() {
         totBrut = 0;
         totBrutSel = 0;
         totNet = 0;
@@ -333,14 +327,14 @@ public class Panel extends javax.swing.JPanel {
 
     private void actualiserTotaux(String methode) {
         System.out.println("actualiserTotaux - " + methode);
-        actualiserTotalNetAPayer();
+        actualiserTotaux();
     }
 
     private void parametrerTableFicheDePaie() {
         initModelTableFicheDePai();
         chargerDataTableFicheDePaie();
         fixerColonnesTableFicheDePaie(true);
-        filtrerTableFichePaie();
+        //filtrerTableFichePaie();
     }
 
     private void initModelTableFicheDePai() {
@@ -1086,7 +1080,7 @@ public class Panel extends javax.swing.JPanel {
 
         panelCriteres_categorie.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Catégorie d'Agents", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(102, 102, 102))); // NOI18N
 
-        chCategorie.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "CATEGORIE - ADMINISTRATION_1", "CATEGORIE - ADMINISTRATION_2", "CATEGORIE - MATERNELLE", "CATEGORIE - PARTIEL", "CATEGORIE - PRIMAIRE", "CATEGORIE - PRIME", "CATEGORIE - SECONDAIRE ", "CATEGORIE - SURVEILLANT" }));
+        chCategorie.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TOUTES LES CATEGORIES D'AGENTS", "CATEGORIE - ADMINISTRATION_1", "CATEGORIE - ADMINISTRATION_2", "CATEGORIE - MATERNELLE", "CATEGORIE - PARTIEL", "CATEGORIE - PRIMAIRE", "CATEGORIE - PRIME", "CATEGORIE - SECONDAIRE ", "CATEGORIE - SURVEILLANT" }));
         chCategorie.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chCategorieItemStateChanged(evt);
@@ -1166,7 +1160,7 @@ public class Panel extends javax.swing.JPanel {
     private void combototMonnaieItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_combototMonnaieItemStateChanged
         // TODO add your handling code here:
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-            actualiserTotalNetAPayer();
+            actualiserTotaux();
             actualiserTotaux("combototMonnaieItemStateChanged");
         }
     }//GEN-LAST:event_combototMonnaieItemStateChanged
