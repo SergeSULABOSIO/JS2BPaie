@@ -100,7 +100,7 @@ public class RenduTableFiche implements TableCellRenderer {
                 cellule = new CelluleSimpleTableau(" " + getCategorieAgent(Integer.parseInt(value+"")) + " ", CelluleSimpleTableau.ALIGNE_GAUCHE, null);
                 break;
             case 5://Monnaie
-                cellule = new CelluleSimpleTableau(" " + getMonnaie(Integer.parseInt(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_GAUCHE, iconeEdition);
+                cellule = new CelluleSimpleTableau(" " + getMonnaie(Integer.parseInt(value+"")) + " ", CelluleSimpleTableau.ALIGNE_GAUCHE, iconeEdition);
                 break;
             case 6://Salaire de base (+)
                 cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);

@@ -19,6 +19,7 @@ import SOURCES.CallBack.EcouteurUpdateClose;
 import SOURCES.CallBack.EcouteurValeursChangees;
 import SOURCES.EditeurTable.EditeurAgents;
 import SOURCES.EditeurTable.EditeurDate;
+import SOURCES.EditeurTable.EditeurMois;
 import SOURCES.EditeurTable.EditeurMonnaie;
 import SOURCES.Interface.InterfaceAgent;
 import SOURCES.Interface.InterfaceEntreprise;
@@ -32,12 +33,9 @@ import SOURCES.Utilitaires.ParametreFichesDePaie;
 import SOURCES.Utilitaires.SortiesFichesDePaies;
 import SOURCES.Utilitaires.Util;
 import SOURCES.Utilitaires.XX_Fiche;
-import com.toedter.calendar.JDateChooser;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +43,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.event.ListSelectionEvent;
@@ -79,7 +78,8 @@ public class Panel extends javax.swing.JPanel {
     public int indexTabSelected = -1;
     public DonneesFicheDePaie donneesFiche;
     public ParametreFichesDePaie parametreFichesDePaie;
-    public double totalMasse = 0;
+    public double totBrut, totRetenu, totNet = 0;
+    public double totBrutSel, totRetenuSel, totNetSel = 0;
 
     public String monnaieOutput = "";
     public static final int TYPE_EXPORT_TOUT = 0;
@@ -105,20 +105,13 @@ public class Panel extends javax.swing.JPanel {
 
         initComposantsMoteursRecherche();
         activerMoteurRecherche();
-        actualiserBtExportTab();
+        ecouterAgentSelectionne();
     }
 
     private void initComposantsMoteursRecherche() {
         //Composants pour Encaissements
         chRecherche.setTextInitial("Recherche : Saisissez votre mot clé ici, puis tapez ENTER");
         activerCriteres();
-    }
-
-    private void actualiserBtExportTab() {
-        if (btPDFSynth != null) {
-            btPDFSynth.setText("Exp. fiche.", 12, true);
-            mPDFSynth.setText("Exporter cette fiche", 12, true);
-        }
     }
 
     private void afficherCriterePlus() {
@@ -227,27 +220,53 @@ public class Panel extends javax.swing.JPanel {
         return null;
     }
 
-    private double getMontant(InterfaceMonnaie ImonnaieOutput, InterfaceFiche Ifiche) {
+    private void getMontantsMasse(InterfaceMonnaie ImonnaieOutput, InterfaceFiche Ifiche) {
         if (Ifiche != null && ImonnaieOutput != null) {
             if (ImonnaieOutput.getId() == Ifiche.getIdMonnaie()) {
-                return Util.getNetAPayer(Ifiche);
+                totNet += Util.getNetAPayer(Ifiche);
+                totBrut += Util.getTotalAPayer(Ifiche);
+                totRetenu += Util.getTotalRetenu(Ifiche);
             } else {
                 InterfaceMonnaie ImonnaieOrigine = getMonnaie(Ifiche.getIdMonnaie());
-                double montMonLocal = Util.getNetAPayer(Ifiche) * ImonnaieOrigine.getTauxMonnaieLocale();
-                return (montMonLocal / ImonnaieOutput.getTauxMonnaieLocale());
+                if (ImonnaieOrigine != null) {
+                    totNet += (Util.getNetAPayer(Ifiche) * ImonnaieOrigine.getTauxMonnaieLocale() / ImonnaieOutput.getTauxMonnaieLocale());
+                    totBrut += (Util.getTotalAPayer(Ifiche) * ImonnaieOrigine.getTauxMonnaieLocale() / ImonnaieOutput.getTauxMonnaieLocale());
+                    totRetenu += (Util.getTotalRetenu(Ifiche) * ImonnaieOrigine.getTauxMonnaieLocale() / ImonnaieOutput.getTauxMonnaieLocale());
+                }
             }
-        } else {
-            return 0;
+        }
+    }
+    
+    private void getMontantsSelection(InterfaceMonnaie ImonnaieOutput, InterfaceFiche Ifiche) {
+        if (Ifiche != null && ImonnaieOutput != null) {
+            if (ImonnaieOutput.getId() == Ifiche.getIdMonnaie()) {
+                totNetSel += Util.getNetAPayer(Ifiche);
+                totBrutSel += Util.getTotalAPayer(Ifiche);
+                totRetenuSel += Util.getTotalRetenu(Ifiche);
+            } else {
+                InterfaceMonnaie ImonnaieOrigine = getMonnaie(Ifiche.getIdMonnaie());
+                if (ImonnaieOrigine != null) {
+                    totNetSel += (Util.getNetAPayer(Ifiche) * ImonnaieOrigine.getTauxMonnaieLocale() / ImonnaieOutput.getTauxMonnaieLocale());
+                    totBrutSel += (Util.getTotalAPayer(Ifiche) * ImonnaieOrigine.getTauxMonnaieLocale() / ImonnaieOutput.getTauxMonnaieLocale());
+                    totRetenuSel += (Util.getTotalRetenu(Ifiche) * ImonnaieOrigine.getTauxMonnaieLocale() / ImonnaieOutput.getTauxMonnaieLocale());
+                }
+            }
         }
     }
 
     private void actualiserTotalNetAPayer() {
-        double masseSalariale = 0;
+        totBrut = 0;
+        totBrutSel = 0;
+        totNet = 0;
+        totNetSel = 0;
+        totRetenu = 0;
+        totRetenuSel = 0;
+        
         InterfaceMonnaie ImonnaieOutput = null;
         if (modeleListeFiches != null) {
             ImonnaieOutput = getSelectedMonnaieTotaux();
             for (InterfaceFiche iFiche : modeleListeFiches.getListeData()) {
-                masseSalariale += getMontant(ImonnaieOutput, iFiche);
+                getMontantsMasse(ImonnaieOutput, iFiche);
             }
         }
 
@@ -259,8 +278,7 @@ public class Panel extends javax.swing.JPanel {
                 if (modeleListeFiches != null) {
                     InterfaceFiche iFiche = modeleListeFiches.getFiche(tabLignesSelected[i]);
                     if (iFiche != null && ImonnaieOutput != null) {
-                        //totalSel += intEncaiss.getMontant();
-                        totalSel += getMontant(ImonnaieOutput, iFiche);
+                        getMontantsSelection(ImonnaieOutput, iFiche);
                     }
                 }
             }
@@ -269,17 +287,41 @@ public class Panel extends javax.swing.JPanel {
         if (ImonnaieOutput != null) {
             monnaieOutput = ImonnaieOutput.getCode();
         }
-        String montantSelected = "";
-        if (tabLignesSelected.length != 0) {
-            montantSelected = "| Sélection [" + tabLignesSelected.length + "] : " + Util.getMontantFrancais(totalSel) + " " + monnaieOutput;
-        }
-        totalMasse = masseSalariale;
-        labTotaux.setText("Masse Salariale: " + Util.getMontantFrancais(totalMasse) + " " + monnaieOutput + " " + montantSelected);
+        
+        labSalBrut.setText("Total Brut: " + Util.getMontantFrancais(totBrut) + " " + monnaieOutput);
+        labSalRetenu.setText("Total Retenu: " + Util.getMontantFrancais(totRetenu) + " " + monnaieOutput);
+        labSalNet.setText("Masse Salariale: " + Util.getMontantFrancais(totNet) + " " + monnaieOutput);
+        
+        labSalBrutSelected.setText("Salaire Brut: " + Util.getMontantFrancais(totBrutSel) + " " + monnaieOutput);
+        labSalRetenuSelected.setText("Retenus: " + Util.getMontantFrancais(totRetenuSel) + " " + monnaieOutput);
+        labSalNetSelected.setText("Net à Payer: " + Util.getMontantFrancais(totNetSel) + " " + monnaieOutput);
     }
 
-    public double getMasseSalariale() {
-        return totalMasse;
+    public double getTotBrut() {
+        return totBrut;
     }
+
+    public double getTotRetenu() {
+        return totRetenu;
+    }
+
+    public double getTotNet() {
+        return totNet;
+    }
+
+    public double getTotBrutSel() {
+        return totBrutSel;
+    }
+
+    public double getTotRetenuSel() {
+        return totRetenuSel;
+    }
+
+    public double getTotNetSel() {
+        return totNetSel;
+    }
+
+    
 
     public String getMonnaieOutput() {
         return this.monnaieOutput;
@@ -297,12 +339,12 @@ public class Panel extends javax.swing.JPanel {
     private void parametrerTableFicheDePaie() {
         initModelTableFicheDePai();
         chargerDataTableFicheDePaie();
-        fixerColonnesTableFicheDePaie();
+        fixerColonnesTableFicheDePaie(true);
         filtrerTableFichePaie();
     }
 
     private void initModelTableFicheDePai() {
-        this.modeleListeFiches = new ModeleListeFiches(scrollListeFichesDePaie, btEnregistrer, mEnregistrer, new EcouteurValeursChangees() {
+        this.modeleListeFiches = new ModeleListeFiches(scrollListeFichesDePaie, btEnregistrer, mEnregistrer, this.parametreFichesDePaie, new EcouteurValeursChangees() {
             @Override
             public void onValeurChangee() {
                 if (ecouteurClose != null) {
@@ -323,7 +365,7 @@ public class Panel extends javax.swing.JPanel {
         }
     }
 
-    private void fixerColonnesTableFicheDePaie() {
+    private void fixerColonnesTableFicheDePaie(boolean resizeTable) {
         //Parametrage du rendu de la table
         this.tableListeFichesDePaie.setDefaultRenderer(Object.class, new RenduTableFiche(icones.getModifier_01(), parametreFichesDePaie, modeleListeFiches));
         this.tableListeFichesDePaie.setRowHeight(25);
@@ -331,10 +373,10 @@ public class Panel extends javax.swing.JPanel {
         //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(0), 30, true, null);//N°
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(1), 110, true, new EditeurDate());//Date
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(2), 100, false, null);//Mois
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(3), 150, false, new EditeurAgents(parametreFichesDePaie));//Agent
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(4), 80, false, null);//Catégorie
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(5), 50, true, new EditeurMonnaie(parametreFichesDePaie));//Monnaie
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(2), 100, false, new EditeurMois());//Mois
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(3), 200, false, new EditeurAgents(parametreFichesDePaie));//Agent
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(4), 150, false, null);//Catégorie
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(5), 80, false, new EditeurMonnaie(parametreFichesDePaie));//Monnaie
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(6), 100, true, null);//Salaire de base
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(7), 100, true, null);//Transport
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(8), 100, true, null);//Logement
@@ -354,10 +396,60 @@ public class Panel extends javax.swing.JPanel {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (e.getValueIsAdjusting() == false) {
+                    ecouterAgentSelectionne();
                     actualiserTotaux("ecouterSelection - Table Fiche de paie");
                 }
             }
         });
+
+        if (resizeTable == true) {
+            this.tableListeFichesDePaie.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        }
+    }
+
+    private void ecouterAgentSelectionne() {
+        int ligneSelected = tableListeFichesDePaie.getSelectedRow();
+        if (ligneSelected != -1) {
+            InterfaceFiche Ifiche = modeleListeFiches.getFiche(ligneSelected);
+            if (Ifiche != null) {
+                InterfaceAgent IAgent = getAgent(Ifiche.getIdAgent());
+                if (IAgent != null) {
+                    btPDFSynth.setText("Prod. Bulletin", 12, true);
+                    btPDFSynth.appliquerDroitAccessDynamique(true);
+                    mPDFSynth.setText("Produire le bulletin de " + IAgent.getNom() + " " + IAgent.getPrenom());
+                    mPDFSynth.appliquerDroitAccessDynamique(true);
+                    renameTitrePaneAgent("Sélection - " + IAgent.getNom()+" " + IAgent.getPostnom()+" " + IAgent.getPrenom());
+                } else {
+                    desactiverBts();
+                }
+            } else {
+                desactiverBts();
+            }
+        } else {
+            desactiverBts();
+        }
+    }
+    
+    private void renameTitrePaneAgent(String titre){
+        panSelected.setBorder(javax.swing.BorderFactory.createTitledBorder(null, titre, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(51, 51, 255))); // NOI18N
+    }
+
+    private void desactiverBts() {
+        if (btPDFSynth != null && mPDFSynth != null) {
+            btPDFSynth.appliquerDroitAccessDynamique(false);
+            mPDFSynth.appliquerDroitAccessDynamique(false);
+            mPDFSynth.setText("Produire le billetin");
+            renameTitrePaneAgent("Sélection");
+        }
+    }
+
+    private InterfaceAgent getAgent(int idAgent) {
+        for (InterfaceAgent Icha : this.parametreFichesDePaie.getAgents()) {
+            if (Icha.getId() == idAgent) {
+                return Icha;
+            }
+        }
+        return null;
     }
 
     private void filtrerTableFichePaie() {
@@ -365,12 +457,11 @@ public class Panel extends javax.swing.JPanel {
         TableRowSorter<ModeleListeFiches> sorter = new TableRowSorter<ModeleListeFiches>(modeleListeFiches);
         tableListeFichesDePaie.setRowSorter(sorter);
         List<RowSorter.SortKey> sortKey = new ArrayList<>();
-        sortKey.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+        sortKey.add(new RowSorter.SortKey(1, SortOrder.DESCENDING));
         sorter.setSortKeys(sortKey);
         sorter.sort();
     }
 
-    
     private void setTaille(TableColumn column, int taille, boolean fixe, TableCellEditor editor) {
         column.setPreferredWidth(taille);
         if (fixe == true) {
@@ -434,7 +525,7 @@ public class Panel extends javax.swing.JPanel {
             }
         });
 
-        btPDFSynth = new Bouton(12, "Exp. billetin", icones.getPDF_02(), new BoutonListener() {
+        btPDFSynth = new Bouton(12, "Exp. bulletin", icones.getPDF_02(), new BoutonListener() {
             @Override
             public void OnEcouteLeClick() {
                 typeExport = TYPE_EXPORT_SELECTION;
@@ -500,7 +591,7 @@ public class Panel extends javax.swing.JPanel {
                 labInfos.setIcon(icone);
             }
         };
-        
+
         ecouteurAjout = new EcouteurAjout() {
             @Override
             public void setAjoutFiche(ModeleListeFiches modeleListeFiches) {
@@ -532,7 +623,7 @@ public class Panel extends javax.swing.JPanel {
         this.indexTabSelected = selectedTab;
         actualiserTotaux("activerBoutons");
         afficherCriterePlus();
-        actualiserBtExportTab();
+        ecouterAgentSelectionne();
     }
 
     public void ajouter() {
@@ -563,7 +654,12 @@ public class Panel extends javax.swing.JPanel {
 
     private void setIconesTabs() {
         this.tabPrincipal.setIconAt(0, icones.getDossier_01());  //Liste des Fiches de paie
-        this.labTotaux.setIcon(icones.getNombre_01());
+        this.labSalBrut.setIcon(icones.getNombre_01());
+        this.labSalRetenu.setIcon(icones.getNombre_01());
+        this.labSalNet.setIcon(icones.getNombre_01());
+        this.labSalBrutSelected.setIcon(icones.getNombre_01());
+        this.labSalRetenuSelected.setIcon(icones.getNombre_01());
+        this.labSalNetSelected.setIcon(icones.getNombre_01());
     }
 
     private void setMenuContextuel() {
@@ -688,11 +784,9 @@ public class Panel extends javax.swing.JPanel {
         }
     }
 
-    
     public ParametreFichesDePaie getParametreTresorerie() {
         return parametreFichesDePaie;
     }
-
 
     public String getNomfichierPreuve() {
         return "FicheDePaieS2B.pdf";
@@ -768,6 +862,7 @@ public class Panel extends javax.swing.JPanel {
         switch (indexTabSelected) {
             case 0: //Encaissements
                 modeleListeFiches.actualiser();
+                ecouterAgentSelectionne();
                 break;
         }
     }
@@ -791,7 +886,14 @@ public class Panel extends javax.swing.JPanel {
         panelTotaux = new javax.swing.JPanel();
         combototMonnaie = new javax.swing.JComboBox<>();
         labTauxDeChange = new javax.swing.JLabel();
-        labTotaux = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        labSalBrut = new javax.swing.JLabel();
+        labSalRetenu = new javax.swing.JLabel();
+        labSalNet = new javax.swing.JLabel();
+        panSelected = new javax.swing.JPanel();
+        labSalBrutSelected = new javax.swing.JLabel();
+        labSalRetenuSelected = new javax.swing.JLabel();
+        labSalNetSelected = new javax.swing.JLabel();
         panelCriteres_categorie = new javax.swing.JPanel();
         chCategorie = new javax.swing.JComboBox<>();
 
@@ -874,9 +976,83 @@ public class Panel extends javax.swing.JPanel {
         labTauxDeChange.setForeground(new java.awt.Color(51, 51, 255));
         labTauxDeChange.setText("Taux");
 
-        labTotaux.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        labTotaux.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
-        labTotaux.setText("Total : 0000000000 $ ");
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Masse Salariale", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(51, 51, 255))); // NOI18N
+
+        labSalBrut.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalBrut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
+        labSalBrut.setText("Total : 0000000000 $ ");
+
+        labSalRetenu.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalRetenu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
+        labSalRetenu.setText("Total : 0000000000 $ ");
+
+        labSalNet.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalNet.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
+        labSalNet.setText("Total : 0000000000 $ ");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labSalBrut, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labSalRetenu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labSalNet, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(labSalBrut)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(labSalRetenu)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(labSalNet)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        panSelected.setBackground(new java.awt.Color(255, 255, 255));
+        panSelected.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Fiche de paie séléctionnée", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(51, 51, 255))); // NOI18N
+
+        labSalBrutSelected.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalBrutSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
+        labSalBrutSelected.setText("Total : 0000000000 $ ");
+
+        labSalRetenuSelected.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalRetenuSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
+        labSalRetenuSelected.setText("Total : 0000000000 $ ");
+
+        labSalNetSelected.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalNetSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
+        labSalNetSelected.setText("Total : 0000000000 $ ");
+
+        javax.swing.GroupLayout panSelectedLayout = new javax.swing.GroupLayout(panSelected);
+        panSelected.setLayout(panSelectedLayout);
+        panSelectedLayout.setHorizontalGroup(
+            panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panSelectedLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labSalBrutSelected, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labSalRetenuSelected, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labSalNetSelected, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        panSelectedLayout.setVerticalGroup(
+            panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panSelectedLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(labSalBrutSelected)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(labSalRetenuSelected)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(labSalNetSelected)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout panelTotauxLayout = new javax.swing.GroupLayout(panelTotaux);
         panelTotaux.setLayout(panelTotauxLayout);
@@ -885,11 +1061,14 @@ public class Panel extends javax.swing.JPanel {
             .addGroup(panelTotauxLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelTotauxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labTauxDeChange, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(panelTotauxLayout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(panSelected, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(panelTotauxLayout.createSequentialGroup()
                         .addComponent(combototMonnaie, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(labTotaux, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(labTauxDeChange, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         panelTotauxLayout.setVerticalGroup(
@@ -897,10 +1076,12 @@ public class Panel extends javax.swing.JPanel {
             .addGroup(panelTotauxLayout.createSequentialGroup()
                 .addGroup(panelTotauxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(combototMonnaie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(labTotaux))
+                    .addComponent(labTauxDeChange))
                 .addGap(5, 5, 5)
-                .addComponent(labTauxDeChange)
-                .addGap(0, 5, Short.MAX_VALUE))
+                .addGroup(panelTotauxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(panSelected, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(5, 5, 5))
         );
 
         panelCriteres_categorie.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Catégorie d'Agents", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(102, 102, 102))); // NOI18N
@@ -953,8 +1134,8 @@ public class Panel extends javax.swing.JPanel {
                 .addGap(2, 2, 2)
                 .addComponent(panelCriteres_categorie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(5, 5, 5)
-                .addComponent(tabPrincipal, javax.swing.GroupLayout.DEFAULT_SIZE, 354, Short.MAX_VALUE)
-                .addGap(5, 5, 5)
+                .addComponent(tabPrincipal, javax.swing.GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelTotaux, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(labInfos)
@@ -1011,9 +1192,16 @@ public class Panel extends javax.swing.JPanel {
     private UI.JS2bTextField chRecherche;
     private javax.swing.JComboBox<String> combototMonnaie;
     private javax.swing.JButton jButton5;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel labInfos;
+    private javax.swing.JLabel labSalBrut;
+    private javax.swing.JLabel labSalBrutSelected;
+    private javax.swing.JLabel labSalNet;
+    private javax.swing.JLabel labSalNetSelected;
+    private javax.swing.JLabel labSalRetenu;
+    private javax.swing.JLabel labSalRetenuSelected;
     private javax.swing.JLabel labTauxDeChange;
-    private javax.swing.JLabel labTotaux;
+    private javax.swing.JPanel panSelected;
     private javax.swing.JPanel panelCriteres_categorie;
     private javax.swing.JPanel panelTotaux;
     private javax.swing.JScrollPane scrollListeFichesDePaie;

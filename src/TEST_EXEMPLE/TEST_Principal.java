@@ -194,7 +194,6 @@ public class TEST_Principal extends javax.swing.JFrame {
         //Les types des ragents
         Vector<InterfaceAgent> agents = new Vector<>();
         agents.add(defaultAgent);
-        agents.addElement(new TEST_Agent(11, entreprise.getId(), idUtilisateur, exercice.getId(), "SULA", "ESUA", "Yannick", InterfaceAgent.SEXE_MASCULIN, InterfaceAgent.NIVEAU_ETUDE_GRADUE, new Date().getTime() + 15, InterfaceAgent.CATEGORIE_SECONDAIRE, InterfaceAgent.BETA_EXISTANT));
         agents.addElement(new TEST_Agent(12, entreprise.getId(), idUtilisateur, exercice.getId(), "SULA", "ESUA", "Yannick", InterfaceAgent.SEXE_MASCULIN, InterfaceAgent.NIVEAU_ETUDE_GRADUE, new Date().getTime() + 15, InterfaceAgent.CATEGORIE_SECONDAIRE, InterfaceAgent.BETA_EXISTANT));
         agents.addElement(new TEST_Agent(13, entreprise.getId(), idUtilisateur, exercice.getId(), "SULA", "OKONDJI", "Hermine", InterfaceAgent.SEXE_FEMININ, InterfaceAgent.NIVEAU_ETUDE_LICENCIE, new Date().getTime() + 16, InterfaceAgent.CATEGORIE_ADMINISTRATION_1, InterfaceAgent.BETA_EXISTANT));
         agents.addElement(new TEST_Agent(14, entreprise.getId(), idUtilisateur, exercice.getId(), "MUTA", "KANKUNGWALA", "Christian", InterfaceAgent.SEXE_MASCULIN, InterfaceAgent.NIVEAU_ETUDE_MASTER, new Date().getTime() + 17, InterfaceAgent.CATEGORIE_ADMINISTRATION_2, InterfaceAgent.BETA_EXISTANT));

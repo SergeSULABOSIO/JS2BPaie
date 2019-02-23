@@ -5,11 +5,12 @@
  */
 package SOURCES.ModelsTables;
 
-
 import BEAN_BARRE_OUTILS.Bouton;
 import BEAN_MenuContextuel.RubriqueSimple;
 import SOURCES.CallBack.EcouteurValeursChangees;
+import SOURCES.Interface.InterfaceAgent;
 import SOURCES.Interface.InterfaceFiche;
+import SOURCES.Utilitaires.ParametreFichesDePaie;
 import SOURCES.Utilitaires.Util;
 import java.awt.Color;
 import java.util.Date;
@@ -31,12 +32,14 @@ public class ModeleListeFiches extends AbstractTableModel {
     private EcouteurValeursChangees ecouteurModele;
     private Bouton btEnreg;
     private RubriqueSimple mEnreg;
+    private ParametreFichesDePaie parametreFichesDePaie;
 
-    public ModeleListeFiches(JScrollPane parent, Bouton btEnreg, RubriqueSimple mEnreg, EcouteurValeursChangees ecouteurModele) {
+    public ModeleListeFiches(JScrollPane parent, Bouton btEnreg, RubriqueSimple mEnreg, ParametreFichesDePaie parametreFichesDePaie, EcouteurValeursChangees ecouteurModele) {
         this.parent = parent;
         this.ecouteurModele = ecouteurModele;
         this.mEnreg = mEnreg;
         this.btEnreg = btEnreg;
+        this.parametreFichesDePaie = parametreFichesDePaie;
     }
 
     /*
@@ -127,10 +130,7 @@ public class ModeleListeFiches extends AbstractTableModel {
     }
     
     
-    */
-    
-
-    
+     */
     public void setListeFiches(Vector<InterfaceFiche> listeData) {
         this.listeData = listeData;
         redessinerTable();
@@ -217,7 +217,7 @@ public class ModeleListeFiches extends AbstractTableModel {
     public String getColumnName(int column) {
         return titreColonnes[column];
     }
-    
+
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
@@ -234,7 +234,7 @@ public class ModeleListeFiches extends AbstractTableModel {
             case 4: //Catégorie
                 return Ifiche.getCategorieAgent();
             case 5: //Monnaie
-                return Ifiche.getCategorieAgent();
+                return Ifiche.getIdMonnaie();
             case 6: //Salaire de base(+)
                 return Ifiche.getSalaireBase();
             case 7: //Transport(+)
@@ -316,11 +316,32 @@ public class ModeleListeFiches extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
-        if(columnIndex == 0 || columnIndex == 4 || columnIndex == 10 || columnIndex == 17 || columnIndex == 18){
+        if (columnIndex == 0 || columnIndex == 4 || columnIndex == 10 || columnIndex == 17 || columnIndex == 18) {
             return false;
-        }else{
+        } else {
             return true;
         }
+    }
+
+    private void updateCategorieAgent(InterfaceFiche Ifiche) {
+        if (Ifiche != null) {
+            for (InterfaceAgent Iagent : this.parametreFichesDePaie.getAgents()) {
+                if (Ifiche.getIdAgent() == Iagent.getId()) {
+                    Ifiche.setCategorieAgent(Iagent.getCategorie());
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean isThisPaieAlreadyExists(String mois, int idAgentNew) {
+        boolean rep = false;
+        for (InterfaceFiche iFiche : listeData) {
+            if (iFiche.getIdAgent() == idAgentNew && mois.equals(iFiche.getMois())) {
+                return true;
+            }
+        }
+        return rep;
     }
 
     @Override
@@ -336,7 +357,13 @@ public class ModeleListeFiches extends AbstractTableModel {
                 Ifiche.setMois(aValue + "");
                 break;
             case 3://Agent
-                Ifiche.setIdAgent(Integer.parseInt(aValue + ""));
+                int newIdAgent = Integer.parseInt(aValue + "");
+                if (!isThisPaieAlreadyExists(Ifiche.getMois(), newIdAgent)) {
+                    Ifiche.setIdAgent(newIdAgent);
+                    updateCategorieAgent(Ifiche);
+                }else{
+                    JOptionPane.showMessageDialog(parent, parametreFichesDePaie.getNomUtilisateur()+",\nCette paie a déjà été enregistrée !", "Alert - DOUBLON", JOptionPane.ERROR_MESSAGE);
+                }
                 break;
             case 5://Monnaie
                 Ifiche.setIdMonnaie(Integer.parseInt(aValue + ""));
