@@ -25,6 +25,17 @@ public class Util {
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
+    
+    public static boolean contientMotsCles(String base, String motscles) {
+        boolean rep = false;
+        String[] tabMotsCles = motscles.split(" ");
+        for (int i = 0; i < tabMotsCles.length; i++) {
+            if (base.toLowerCase().contains(tabMotsCles[i].toLowerCase().trim())) {
+                return true;
+            }
+        }
+        return rep;
+    }
 
     public static String getLettres(double montant, String NomMonnaie) {
         String texte = "";

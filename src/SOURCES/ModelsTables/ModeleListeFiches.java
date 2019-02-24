@@ -45,79 +45,52 @@ public class ModeleListeFiches extends AbstractTableModel {
     /* */
     
     
-    public void chercher(Date dateA, Date dateB, String motcle, int idMonnaie, int idDestination, int idRevenu) {
+    public void chercher(String motcle, int idCategorie) {
         this.listeData.addAll(this.listeDataExclus);
         this.listeDataExclus.removeAllElements();
-        for (InterfaceFiche Iencaissement : this.listeData) {
-            if (Iencaissement != null) {
-                search_verifier_periode(Iencaissement, dateA, dateB, motcle, idMonnaie, idDestination, idRevenu);
+        for (InterfaceFiche Ific : this.listeData) {
+            if (Ific != null) {
+                search_verifier_categorie(Ific, motcle, idCategorie);
             }
         }
         //En fin, on va nettoyer la liste - en enlevant tout objet qui a été black listé
         search_nettoyer();
     }
     
-    private void search_verifier_periode(InterfaceEncaissement Iencaissement, Date dateA, Date dateB, String motcle, int idMonnaie, int idDestination, int idRevenu) {
-        if (Iencaissement != null) {
-            boolean apresA = (Iencaissement.getDate().after(dateA) || Iencaissement.getDate().equals(dateA));
-            boolean avantB = (Iencaissement.getDate().before(dateB) || Iencaissement.getDate().equals(dateB));
-            if (apresA == true && avantB == true) {
+    private void search_verifier_categorie(InterfaceFiche Ifiche, String motcle, int idCategorie) {
+        if (Ifiche != null) {
+            if (idCategorie == -1) {
                 //On ne fait rien
-            } else {
-                search_blacklister(Iencaissement);
+            } else if (Ifiche.getCategorieAgent() != idCategorie) {
+                search_blacklister(Ifiche);
             }
-            search_verifier_monnaie(Iencaissement, motcle, idMonnaie, idDestination, idRevenu);
+            search_verifier_motcle(Ifiche, motcle);
         }
     }
     
-    
-    private void search_verifier_monnaie(InterfaceEncaissement Iencaissement, String motcle, int idMonnaie, int idDestination, int idRevenu) {
-        if (Iencaissement != null) {
-            if (idMonnaie == -1) {
-                //On ne fait rien
-            } else if (Iencaissement.getIdMonnaie() != idMonnaie) {
-                search_blacklister(Iencaissement);
-            }
-            search_verifier_destination(Iencaissement, motcle, idDestination, idRevenu);
-        }
-    }
-    
-    private void search_verifier_destination(InterfaceEncaissement Iencaissement, String motcle, int idDestination, int idRevenu) {
-        if (Iencaissement != null) {
-            if (idDestination == -1) {
-                //On ne fait rien
-            } else if (Iencaissement.getDestination() != idDestination) {
-                search_blacklister(Iencaissement);
-            }
-            search_verifier_revenu(Iencaissement, motcle, idRevenu);
-        }
-    }
-    
-    private void search_verifier_revenu(InterfaceEncaissement Iencaissement, String motcle, int idRevenu) {
-        if (Iencaissement != null) {
-            if (idRevenu == -1) {
-                //On ne fait rien
-            } else if (Iencaissement.getIdRevenu() != idRevenu) {
-                search_blacklister(Iencaissement);
-            }
-            search_verifier_motcle(Iencaissement, motcle);
-        }
-    }
-    
-    private void search_verifier_motcle(InterfaceEncaissement Iencaissement, String motcle) {
-        if (Iencaissement != null) {
+    private void search_verifier_motcle(InterfaceFiche Ifiche, String motcle) {
+        if (Ifiche != null) {
             if (motcle.trim().length() == 0) {
                 //On ne fait rien
-            } else if (Util.contientMotsCles(Iencaissement.getEffectuePar(), motcle) == false && Util.contientMotsCles(Iencaissement.getMotif(), motcle) == false && Util.contientMotsCles(Iencaissement.getReference(), motcle) == false) {
-                search_blacklister(Iencaissement);
+            } else if (Util.contientMotsCles(Ifiche.getMois(), motcle) == false && Util.contientMotsCles(getAgent(Ifiche.getIdAgent()), motcle) == false) {
+                search_blacklister(Ifiche);
             }
         }
     }
+    
+    private String getAgent(int idAgent){
+        for(InterfaceAgent Icha : this.parametreFichesDePaie.getAgents()){
+            if(Icha.getId() == idAgent){
+                return Icha.getNom()+" " + Icha.getPostnom()+" " + Icha.getPrenom();
+            }
+        }
+        return "";
+    }
 
-    private void search_blacklister(InterfaceEncaissement Iencaissement) {
-        if (Iencaissement != null && this.listeDataExclus != null) {
-            if (!listeDataExclus.contains(Iencaissement)) {
-                this.listeDataExclus.add(Iencaissement);
+    private void search_blacklister(InterfaceFiche Ifiche) {
+        if (Ifiche != null && this.listeDataExclus != null) {
+            if (!listeDataExclus.contains(Ifiche)) {
+                this.listeDataExclus.add(Ifiche);
             }
         }
     }
