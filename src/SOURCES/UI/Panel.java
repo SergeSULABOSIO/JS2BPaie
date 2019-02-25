@@ -19,7 +19,6 @@ import SOURCES.CallBack.EcouteurUpdateClose;
 import SOURCES.CallBack.EcouteurValeursChangees;
 import SOURCES.EditeurTable.EditeurAgents;
 import SOURCES.EditeurTable.EditeurDate;
-import SOURCES.EditeurTable.EditeurMois;
 import SOURCES.EditeurTable.EditeurMonnaie;
 import SOURCES.Interface.InterfaceAgent;
 import SOURCES.Interface.InterfaceEntreprise;
@@ -33,9 +32,12 @@ import SOURCES.Utilitaires.ParametreFichesDePaie;
 import SOURCES.Utilitaires.SortiesFichesDePaies;
 import SOURCES.Utilitaires.Util;
 import SOURCES.Utilitaires.XX_Fiche;
+import com.toedter.calendar.JDateChooser;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -101,7 +103,6 @@ public class Panel extends javax.swing.JPanel {
 
         initMonnaieTotaux();
         actualiserTotaux();
-        activerCriteres();
 
         initComposantsMoteursRecherche();
         activerMoteurRecherche();
@@ -109,17 +110,28 @@ public class Panel extends javax.swing.JPanel {
     }
 
     private void initComposantsMoteursRecherche() {
-        //Composants pour Encaissements
+        //Composants du moteur de recherche
         chRecherche.setTextInitial("Recherche : Saisissez votre mot clé ici, puis tapez ENTER");
-        activerCriteres();
+        chEntre.setDate(this.parametreFichesDePaie.getExercice().getDebut());
+        chEt.setDate(this.parametreFichesDePaie.getExercice().getFin());
+
+        ecouterChangementDate(chEt);
+        ecouterChangementDate(chEntre);
     }
 
-    private void afficherCriterePlus() {
-        panelCriteres_categorie.setVisible(true);
-    }
-
-    private void activerCriteres() {
-        afficherCriterePlus();
+    private void ecouterChangementDate(JDateChooser dateChooser) {
+        if (dateChooser != null) {
+            dateChooser.getDateEditor().addPropertyChangeListener(new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if (evt.getPropertyName().equals("date")) {
+                        if (gestionnaireRecherche != null) {
+                            gestionnaireRecherche.demarrerRecherche();
+                        }
+                    }
+                }
+            });
+        }
     }
 
     public int getCategorie(String categorie) {
@@ -146,16 +158,11 @@ public class Panel extends javax.swing.JPanel {
 
     private void activerMoteurRecherche() {
         gestionnaireRecherche = new MoteurRecherche(icones, chRecherche, ecouteurClose) {
-            
+
             @Override
             public void chercher(String motcle) {
                 //On extrait les critère de filtrage des Encaissements
-
-                int idcategorie = getCategorie(chCategorie.getSelectedItem() + "");
-                
-                //ModeleListeFiches.chercher(chDateAEnc.getDate(), chDateBEnc.getDate(), motcle, idMonnaie, idDest, idRevenu);
-                
-                actualiserTotaux();
+                modeleListeFiches.chercher(Util.getDate_CeMatin(chEntre.getDate()), Util.getDate_ZeroHeure(chEt.getDate()), motcle, getCategorie(chCategorie.getSelectedItem() + ""));
                 actualiserTotaux("activerMoteurRecherche");
             }
         };
@@ -230,7 +237,7 @@ public class Panel extends javax.swing.JPanel {
             }
         }
     }
-    
+
     private void getMontantsSelection(InterfaceMonnaie ImonnaieOutput, InterfaceFiche Ifiche) {
         if (Ifiche != null && ImonnaieOutput != null) {
             if (ImonnaieOutput.getId() == Ifiche.getIdMonnaie()) {
@@ -255,7 +262,7 @@ public class Panel extends javax.swing.JPanel {
         totNetSel = 0;
         totRetenu = 0;
         totRetenuSel = 0;
-        
+
         InterfaceMonnaie ImonnaieOutput = null;
         if (modeleListeFiches != null) {
             ImonnaieOutput = getSelectedMonnaieTotaux();
@@ -281,14 +288,16 @@ public class Panel extends javax.swing.JPanel {
         if (ImonnaieOutput != null) {
             monnaieOutput = ImonnaieOutput.getCode();
         }
-        
-        labSalBrut.setText("Total Brut: " + Util.getMontantFrancais(totBrut) + " " + monnaieOutput);
-        labSalRetenu.setText("Total Retenu: " + Util.getMontantFrancais(totRetenu) + " " + monnaieOutput);
-        labSalNet.setText("Masse Salariale: " + Util.getMontantFrancais(totNet) + " " + monnaieOutput);
-        
-        labSalBrutSelected.setText("Salaire Brut: " + Util.getMontantFrancais(totBrutSel) + " " + monnaieOutput);
-        labSalRetenuSelected.setText("Retenus: " + Util.getMontantFrancais(totRetenuSel) + " " + monnaieOutput);
-        labSalNetSelected.setText("Net à Payer: " + Util.getMontantFrancais(totNetSel) + " " + monnaieOutput);
+
+        //Le global
+        labSalBrut.setText(Util.getMontantFrancais(totBrut) + " " + monnaieOutput);
+        labSalRetenu.setText(Util.getMontantFrancais(totRetenu) + " " + monnaieOutput);
+        labSalNet.setText(Util.getMontantFrancais(totNet) + " " + monnaieOutput);
+
+        //L'élements séléctionné
+        labSalBrutSelected.setText(Util.getMontantFrancais(totBrutSel) + " " + monnaieOutput);
+        labSalRetenuSelected.setText(Util.getMontantFrancais(totRetenuSel) + " " + monnaieOutput);
+        labSalNetSelected.setText(Util.getMontantFrancais(totNetSel) + " " + monnaieOutput);
     }
 
     public double getTotBrut() {
@@ -314,8 +323,6 @@ public class Panel extends javax.swing.JPanel {
     public double getTotNetSel() {
         return totNetSel;
     }
-
-    
 
     public String getMonnaieOutput() {
         return this.monnaieOutput;
@@ -367,7 +374,7 @@ public class Panel extends javax.swing.JPanel {
         //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(0), 30, true, null);//N°
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(1), 110, true, new EditeurDate());//Date
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(2), 100, false, new EditeurMois());//Mois
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(2), 100, false, null);//Mois
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(3), 200, false, new EditeurAgents(parametreFichesDePaie));//Agent
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(4), 150, false, null);//Catégorie
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(5), 80, false, new EditeurMonnaie(parametreFichesDePaie));//Monnaie
@@ -412,7 +419,16 @@ public class Panel extends javax.swing.JPanel {
                     btPDFSynth.appliquerDroitAccessDynamique(true);
                     mPDFSynth.setText("Produire le bulletin de " + IAgent.getNom() + " " + IAgent.getPrenom());
                     mPDFSynth.appliquerDroitAccessDynamique(true);
-                    renameTitrePaneAgent("Sélection - " + IAgent.getNom()+" " + IAgent.getPostnom()+" " + IAgent.getPrenom());
+                    renameTitrePaneAgent("Sélection - " + IAgent.getNom() + " " + IAgent.getPostnom() + " " + IAgent.getPrenom());
+
+                    String SAgent = IAgent.getNom() + " " + IAgent.getPostnom() + " " + IAgent.getPrenom();
+                    InterfaceMonnaie Imon = getMonnaie(Ifiche.getIdMonnaie());
+                    String monnaie = Imon.getCode();
+                    double nett = Util.getNetAPayer(Ifiche);
+                    String net = Util.getMontantFrancais(nett);
+                    String netLettre = Util.getMontantLettres(nett, Imon.getNom());
+                    this.ecouteurClose.onActualiser(SAgent + ", Paie de " + Ifiche.getMois() + ", Net à Payer: " + net + " " + monnaie + " (" + netLettre + ").", icones.getClient_01());
+
                 } else {
                     desactiverBts();
                 }
@@ -423,8 +439,8 @@ public class Panel extends javax.swing.JPanel {
             desactiverBts();
         }
     }
-    
-    private void renameTitrePaneAgent(String titre){
+
+    private void renameTitrePaneAgent(String titre) {
         panSelected.setBorder(javax.swing.BorderFactory.createTitledBorder(null, titre, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(51, 51, 255))); // NOI18N
     }
 
@@ -557,14 +573,6 @@ public class Panel extends javax.swing.JPanel {
                     break;
             }
         }
-        switch (tab) {
-            case 0://Tab Fiche de paie
-                InterfaceFiche enc = modeleListeFiches.getFiche(tableListeFichesDePaie.getSelectedRow());
-                if (enc != null) {
-                    this.ecouteurClose.onActualiser("Fiche...:" + enc.getMois() + " " + enc.getIdAgent() + " " + Util.getMontantFrancais(Util.getNetAPayer(enc)) + " " + getMonnaie(enc.getIdMonnaie()).getCode() + ".", icones.getClient_01());
-                }
-                break;
-        }
     }
 
     public void init() {
@@ -616,7 +624,6 @@ public class Panel extends javax.swing.JPanel {
     public void activerBoutons(int selectedTab) {
         this.indexTabSelected = selectedTab;
         actualiserTotaux("activerBoutons");
-        afficherCriterePlus();
         ecouterAgentSelectionne();
     }
 
@@ -648,12 +655,12 @@ public class Panel extends javax.swing.JPanel {
 
     private void setIconesTabs() {
         this.tabPrincipal.setIconAt(0, icones.getDossier_01());  //Liste des Fiches de paie
-        this.labSalBrut.setIcon(icones.getNombre_01());
-        this.labSalRetenu.setIcon(icones.getNombre_01());
-        this.labSalNet.setIcon(icones.getNombre_01());
-        this.labSalBrutSelected.setIcon(icones.getNombre_01());
-        this.labSalRetenuSelected.setIcon(icones.getNombre_01());
-        this.labSalNetSelected.setIcon(icones.getNombre_01());
+        this.llabSalBrut.setIcon(icones.getNombre_01());
+        this.llabSalRetenu.setIcon(icones.getNombre_01());
+        this.llabSalNet.setIcon(icones.getNombre_01());
+        this.llabSalBrutSelected.setIcon(icones.getNombre_01());
+        this.llabSalRetenuSelected.setIcon(icones.getNombre_01());
+        this.llabSalNetSelected.setIcon(icones.getNombre_01());
     }
 
     private void setMenuContextuel() {
@@ -877,19 +884,26 @@ public class Panel extends javax.swing.JPanel {
         tableListeFichesDePaie = new javax.swing.JTable();
         labInfos = new javax.swing.JLabel();
         chRecherche = new UI.JS2bTextField();
-        panelTotaux = new javax.swing.JPanel();
-        combototMonnaie = new javax.swing.JComboBox<>();
-        labTauxDeChange = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
-        labSalBrut = new javax.swing.JLabel();
-        labSalRetenu = new javax.swing.JLabel();
-        labSalNet = new javax.swing.JLabel();
+        panelCriteres_categorie = new javax.swing.JPanel();
+        chCategorie = new javax.swing.JComboBox<>();
+        chEntre = new com.toedter.calendar.JDateChooser();
+        chEt = new com.toedter.calendar.JDateChooser();
         panSelected = new javax.swing.JPanel();
         labSalBrutSelected = new javax.swing.JLabel();
         labSalRetenuSelected = new javax.swing.JLabel();
         labSalNetSelected = new javax.swing.JLabel();
-        panelCriteres_categorie = new javax.swing.JPanel();
-        chCategorie = new javax.swing.JComboBox<>();
+        llabSalBrutSelected = new javax.swing.JLabel();
+        llabSalRetenuSelected = new javax.swing.JLabel();
+        llabSalNetSelected = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        labSalBrut = new javax.swing.JLabel();
+        labSalRetenu = new javax.swing.JLabel();
+        labSalNet = new javax.swing.JLabel();
+        llabSalBrut = new javax.swing.JLabel();
+        llabSalRetenu = new javax.swing.JLabel();
+        llabSalNet = new javax.swing.JLabel();
+        labTauxDeChange = new javax.swing.JLabel();
+        combototMonnaie = new javax.swing.JComboBox<>();
 
         setBackground(new java.awt.Color(255, 255, 255));
 
@@ -956,8 +970,164 @@ public class Panel extends javax.swing.JPanel {
         chRecherche.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
         chRecherche.setTextInitial("Recherche");
 
-        panelTotaux.setBackground(new java.awt.Color(255, 255, 255));
-        panelTotaux.setBorder(javax.swing.BorderFactory.createTitledBorder("Total"));
+        panelCriteres_categorie.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Catégorie d'Agents", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(102, 102, 102))); // NOI18N
+
+        chCategorie.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TOUTES LES CATEGORIES D'AGENTS", "CATEGORIE - ADMINISTRATION_1", "CATEGORIE - ADMINISTRATION_2", "CATEGORIE - MATERNELLE", "CATEGORIE - PARTIEL", "CATEGORIE - PRIMAIRE", "CATEGORIE - PRIME", "CATEGORIE - SECONDAIRE", "CATEGORIE - SURVEILLANT" }));
+        chCategorie.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chCategorieItemStateChanged(evt);
+            }
+        });
+
+        chEntre.setDateFormatString("dd MMM yyyy");
+        chEntre.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+
+        chEt.setDateFormatString("dd MMM yyyy");
+        chEt.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+
+        javax.swing.GroupLayout panelCriteres_categorieLayout = new javax.swing.GroupLayout(panelCriteres_categorie);
+        panelCriteres_categorie.setLayout(panelCriteres_categorieLayout);
+        panelCriteres_categorieLayout.setHorizontalGroup(
+            panelCriteres_categorieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(panelCriteres_categorieLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(chEntre, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chEt, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chCategorie, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        panelCriteres_categorieLayout.setVerticalGroup(
+            panelCriteres_categorieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelCriteres_categorieLayout.createSequentialGroup()
+                .addGap(5, 5, 5)
+                .addGroup(panelCriteres_categorieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chCategorie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(panelCriteres_categorieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(chEt, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(chEntre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
+        );
+
+        panSelected.setBackground(new java.awt.Color(255, 255, 255));
+        panSelected.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Fiche de paie séléctionnée", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(51, 51, 255))); // NOI18N
+
+        labSalBrutSelected.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalBrutSelected.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        labSalBrutSelected.setText("0000000000 $ ");
+
+        labSalRetenuSelected.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalRetenuSelected.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        labSalRetenuSelected.setText("0000000000 $ ");
+
+        labSalNetSelected.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalNetSelected.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        labSalNetSelected.setText("0000000000 $ ");
+
+        llabSalBrutSelected.setText("Salaire net");
+
+        llabSalRetenuSelected.setText("Retenus");
+
+        llabSalNetSelected.setText("Net à payer");
+
+        javax.swing.GroupLayout panSelectedLayout = new javax.swing.GroupLayout(panSelected);
+        panSelected.setLayout(panSelectedLayout);
+        panSelectedLayout.setHorizontalGroup(
+            panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panSelectedLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(llabSalBrutSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(llabSalRetenuSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(llabSalNetSelected, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labSalNetSelected, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
+                    .addComponent(labSalRetenuSelected, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labSalBrutSelected, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(5, 5, 5))
+        );
+        panSelectedLayout.setVerticalGroup(
+            panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panSelectedLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labSalBrutSelected)
+                    .addComponent(llabSalBrutSelected))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labSalRetenuSelected)
+                    .addComponent(llabSalRetenuSelected))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labSalNetSelected)
+                    .addComponent(llabSalNetSelected))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Masse Salariale", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(51, 51, 255))); // NOI18N
+
+        labSalBrut.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalBrut.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        labSalBrut.setText("00000000 $");
+
+        labSalRetenu.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalRetenu.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        labSalRetenu.setText("00000000 $");
+
+        labSalNet.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        labSalNet.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        labSalNet.setText("00000000 $");
+
+        llabSalBrut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
+        llabSalBrut.setText("Total - Salaires bruts");
+
+        llabSalRetenu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
+        llabSalRetenu.setText("Total - Retenus");
+
+        llabSalNet.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
+        llabSalNet.setText("Total - Nets à payer");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(llabSalRetenu, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(llabSalBrut, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE)
+                    .addComponent(llabSalNet, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(5, 5, 5)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labSalNet, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
+                    .addComponent(labSalRetenu, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labSalBrut, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labSalBrut)
+                    .addComponent(llabSalBrut))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labSalRetenu)
+                    .addComponent(llabSalRetenu))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labSalNet)
+                    .addComponent(llabSalNet))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        labTauxDeChange.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        labTauxDeChange.setForeground(new java.awt.Color(51, 51, 255));
+        labTauxDeChange.setText("Taux");
 
         combototMonnaie.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         combototMonnaie.addItemListener(new java.awt.event.ItemListener() {
@@ -966,158 +1136,32 @@ public class Panel extends javax.swing.JPanel {
             }
         });
 
-        labTauxDeChange.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
-        labTauxDeChange.setForeground(new java.awt.Color(51, 51, 255));
-        labTauxDeChange.setText("Taux");
-
-        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Masse Salariale", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(51, 51, 255))); // NOI18N
-
-        labSalBrut.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        labSalBrut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
-        labSalBrut.setText("Total : 0000000000 $ ");
-
-        labSalRetenu.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        labSalRetenu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
-        labSalRetenu.setText("Total : 0000000000 $ ");
-
-        labSalNet.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        labSalNet.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
-        labSalNet.setText("Total : 0000000000 $ ");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labSalBrut, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(labSalRetenu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(labSalNet, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(labSalBrut)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(labSalRetenu)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(labSalNet)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        panSelected.setBackground(new java.awt.Color(255, 255, 255));
-        panSelected.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Fiche de paie séléctionnée", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(51, 51, 255))); // NOI18N
-
-        labSalBrutSelected.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        labSalBrutSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
-        labSalBrutSelected.setText("Total : 0000000000 $ ");
-
-        labSalRetenuSelected.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        labSalRetenuSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
-        labSalRetenuSelected.setText("Total : 0000000000 $ ");
-
-        labSalNetSelected.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        labSalNetSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Facture01.png"))); // NOI18N
-        labSalNetSelected.setText("Total : 0000000000 $ ");
-
-        javax.swing.GroupLayout panSelectedLayout = new javax.swing.GroupLayout(panSelected);
-        panSelected.setLayout(panSelectedLayout);
-        panSelectedLayout.setHorizontalGroup(
-            panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panSelectedLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labSalBrutSelected, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(labSalRetenuSelected, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(labSalNetSelected, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        panSelectedLayout.setVerticalGroup(
-            panSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panSelectedLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(labSalBrutSelected)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(labSalRetenuSelected)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(labSalNetSelected)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout panelTotauxLayout = new javax.swing.GroupLayout(panelTotaux);
-        panelTotaux.setLayout(panelTotauxLayout);
-        panelTotauxLayout.setHorizontalGroup(
-            panelTotauxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelTotauxLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(panelTotauxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelTotauxLayout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(panSelected, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(panelTotauxLayout.createSequentialGroup()
-                        .addComponent(combototMonnaie, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(labTauxDeChange, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        panelTotauxLayout.setVerticalGroup(
-            panelTotauxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelTotauxLayout.createSequentialGroup()
-                .addGroup(panelTotauxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(combototMonnaie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(labTauxDeChange))
-                .addGap(5, 5, 5)
-                .addGroup(panelTotauxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(panSelected, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(5, 5, 5))
-        );
-
-        panelCriteres_categorie.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Catégorie d'Agents", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 13), new java.awt.Color(102, 102, 102))); // NOI18N
-
-        chCategorie.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TOUTES LES CATEGORIES D'AGENTS", "CATEGORIE - ADMINISTRATION_1", "CATEGORIE - ADMINISTRATION_2", "CATEGORIE - MATERNELLE", "CATEGORIE - PARTIEL", "CATEGORIE - PRIMAIRE", "CATEGORIE - PRIME", "CATEGORIE - SECONDAIRE ", "CATEGORIE - SURVEILLANT" }));
-        chCategorie.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                chCategorieItemStateChanged(evt);
-            }
-        });
-
-        javax.swing.GroupLayout panelCriteres_categorieLayout = new javax.swing.GroupLayout(panelCriteres_categorie);
-        panelCriteres_categorie.setLayout(panelCriteres_categorieLayout);
-        panelCriteres_categorieLayout.setHorizontalGroup(
-            panelCriteres_categorieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelCriteres_categorieLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(chCategorie, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        panelCriteres_categorieLayout.setVerticalGroup(
-            panelCriteres_categorieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelCriteres_categorieLayout.createSequentialGroup()
-                .addGap(5, 5, 5)
-                .addComponent(chCategorie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(barreOutils, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(tabPrincipal, javax.swing.GroupLayout.DEFAULT_SIZE, 793, Short.MAX_VALUE)
-            .addComponent(panelTotaux, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labInfos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chRecherche, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+            .addComponent(tabPrincipal)
             .addComponent(panelCriteres_categorie, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(labInfos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chRecherche, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(28, 243, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(combototMonnaie, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(panSelected, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(labTauxDeChange, javax.swing.GroupLayout.PREFERRED_SIZE, 562, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1127,10 +1171,16 @@ public class Panel extends javax.swing.JPanel {
                 .addComponent(chRecherche, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(2, 2, 2)
                 .addComponent(panelCriteres_categorie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
-                .addComponent(tabPrincipal, javax.swing.GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE)
+                .addGap(2, 2, 2)
+                .addComponent(tabPrincipal, javax.swing.GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(panelTotaux, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(combototMonnaie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(panSelected, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(labTauxDeChange)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(labInfos)
                 .addContainerGap())
@@ -1160,7 +1210,6 @@ public class Panel extends javax.swing.JPanel {
     private void combototMonnaieItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_combototMonnaieItemStateChanged
         // TODO add your handling code here:
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-            actualiserTotaux();
             actualiserTotaux("combototMonnaieItemStateChanged");
         }
     }//GEN-LAST:event_combototMonnaieItemStateChanged
@@ -1183,6 +1232,8 @@ public class Panel extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar barreOutils;
     private javax.swing.JComboBox<String> chCategorie;
+    private com.toedter.calendar.JDateChooser chEntre;
+    private com.toedter.calendar.JDateChooser chEt;
     private UI.JS2bTextField chRecherche;
     private javax.swing.JComboBox<String> combototMonnaie;
     private javax.swing.JButton jButton5;
@@ -1195,9 +1246,14 @@ public class Panel extends javax.swing.JPanel {
     private javax.swing.JLabel labSalRetenu;
     private javax.swing.JLabel labSalRetenuSelected;
     private javax.swing.JLabel labTauxDeChange;
+    private javax.swing.JLabel llabSalBrut;
+    private javax.swing.JLabel llabSalBrutSelected;
+    private javax.swing.JLabel llabSalNet;
+    private javax.swing.JLabel llabSalNetSelected;
+    private javax.swing.JLabel llabSalRetenu;
+    private javax.swing.JLabel llabSalRetenuSelected;
     private javax.swing.JPanel panSelected;
     private javax.swing.JPanel panelCriteres_categorie;
-    private javax.swing.JPanel panelTotaux;
     private javax.swing.JScrollPane scrollListeFichesDePaie;
     private javax.swing.JTabbedPane tabPrincipal;
     private javax.swing.JTable tableListeFichesDePaie;

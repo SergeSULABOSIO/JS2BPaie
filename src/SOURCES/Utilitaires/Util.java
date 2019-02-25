@@ -113,6 +113,40 @@ public class Util {
         return dateS;
     }
     
+    public static Date getDate_ZeroHeure() {
+        Date date = new Date();
+        date.setHours(23);
+        date.setMinutes(59);
+        date.setSeconds(59);
+        return date;
+    }
+    
+    public static Date getDate_CeMatin(Date date) {
+        if (date != null) {
+            date.setHours(0);
+            date.setMinutes(0);
+            date.setSeconds(0);
+        }
+        return date;
+    }
+
+    public static Date getDate_ZeroHeure(Date date) {
+        if (date != null) {
+            date.setHours(23);
+            date.setMinutes(59);
+            date.setSeconds(59);
+        }
+        return date;
+    }
+
+    public static Date getDate_CeMatin() {
+        Date date = new Date();
+        date.setHours(0);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        return date;
+    }
+    
     public static String getDateFrancais_Mois(Date date) {
         String dateS = "";
         try {

@@ -42,22 +42,35 @@ public class ModeleListeFiches extends AbstractTableModel {
         this.parametreFichesDePaie = parametreFichesDePaie;
     }
 
-    /* */
     
-    
-    public void chercher(String motcle, int idCategorie) {
+    public void chercher(Date dateA, Date dateB, String motcle, int idCategorie) {
         this.listeData.addAll(this.listeDataExclus);
         this.listeDataExclus.removeAllElements();
         for (InterfaceFiche Ific : this.listeData) {
             if (Ific != null) {
-                search_verifier_categorie(Ific, motcle, idCategorie);
+                search_verifier_periode(Ific, dateA, dateB, motcle, idCategorie);
             }
         }
         //En fin, on va nettoyer la liste - en enlevant tout objet qui a été black listé
         search_nettoyer();
     }
     
+    private void search_verifier_periode(InterfaceFiche Ifiche, Date dateA, Date dateB, String motcle, int idCategorie) {
+        if (Ifiche != null) {
+            boolean apresA = (Ifiche.getDateEnregistrement().after(dateA) || Ifiche.getDateEnregistrement().equals(dateA));
+            boolean avantB = (Ifiche.getDateEnregistrement().before(dateB) || Ifiche.getDateEnregistrement().equals(dateB));
+            if (apresA == true && avantB == true) {
+                //On ne fait rien
+            } else {
+                search_blacklister(Ifiche);
+            }
+            search_verifier_categorie(Ifiche, motcle, idCategorie);
+        }
+    }
+    
     private void search_verifier_categorie(InterfaceFiche Ifiche, String motcle, int idCategorie) {
+        //System.out.println("Ifiche = " + Ifiche.getCategorieAgent());
+        //System.out.println("idCategorie = " + idCategorie);
         if (Ifiche != null) {
             if (idCategorie == -1) {
                 //On ne fait rien

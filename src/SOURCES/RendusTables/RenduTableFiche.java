@@ -67,7 +67,7 @@ public class RenduTableFiche implements TableCellRenderer {
             case InterfaceAgent.CATEGORIE_PARTIEL:
                 return "PARTIELLE";
             case InterfaceAgent.CATEGORIE_PRIMAIRE:
-                return "Primaire";
+                return "PRIMAIRE";
             case InterfaceAgent.CATEGORIE_PRIME:
                 return "PRIME";
             case InterfaceAgent.CATEGORIE_SECONDAIRE:
