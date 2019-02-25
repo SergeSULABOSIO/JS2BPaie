@@ -20,6 +20,7 @@ import SOURCES.CallBack.EcouteurValeursChangees;
 import SOURCES.EditeurTable.EditeurAgents;
 import SOURCES.EditeurTable.EditeurDate;
 import SOURCES.EditeurTable.EditeurMonnaie;
+import SOURCES.GenerateurPDF.DocumentPDF;
 import SOURCES.Interface.InterfaceAgent;
 import SOURCES.Interface.InterfaceEntreprise;
 import SOURCES.Interface.InterfaceFiche;
@@ -183,6 +184,18 @@ public class Panel extends javax.swing.JPanel {
 
     public Date getDateDocument() {
         return new Date();
+    }
+
+    public int getTypeExport() {
+        return typeExport;
+    }
+    
+    public Date getCritereDateDebut(){
+        return chEntre.getDate();
+    }
+    
+    public Date getCritereFin(){
+        return chEt.getDate();
     }
 
     private void initMonnaieTotaux() {
@@ -778,14 +791,14 @@ public class Panel extends javax.swing.JPanel {
         if (dialogResult == JOptionPane.YES_OPTION) {
             try {
                 SortiesFichesDePaies sortie = getSortiesFichesDePaies(btImprimer, mImprimer);
-                //DocumentPDF documentPDF = new DocumentPDF(this, DocumentPDF.ACTION_IMPRIMER, sortie);
+                DocumentPDF documentPDF = new DocumentPDF(this, DocumentPDF.ACTION_IMPRIMER, sortie);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public ParametreFichesDePaie getParametreTresorerie() {
+    public ParametreFichesDePaie getParametreFichesDePaie() {
         return parametreFichesDePaie;
     }
 
@@ -852,7 +865,7 @@ public class Panel extends javax.swing.JPanel {
         if (dialogResult == JOptionPane.YES_OPTION) {
             try {
                 SortiesFichesDePaies sortie = getSortiesFichesDePaies(btPDF, mPDF);
-                //DocumentPDF docpdf = new DocumentPDF(this, DocumentPDF.ACTION_OUVRIR, sortie);
+                DocumentPDF docpdf = new DocumentPDF(this, DocumentPDF.ACTION_OUVRIR, sortie);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -99,6 +99,8 @@ public class Util {
             return 0;
         }
     }
+    
+    
 
     public static String getDateFrancais(Date date) {
         String dateS = "";
@@ -128,6 +130,14 @@ public class Util {
             date.setSeconds(0);
         }
         return date;
+    }
+    
+    public static String getTexteCourt(String texteOrigine, int tailleOutput){
+        if(texteOrigine.trim().length() > tailleOutput){
+            return texteOrigine.substring(0, tailleOutput)+"...";
+        }else{
+            return texteOrigine;
+        }
     }
 
     public static Date getDate_ZeroHeure(Date date) {
