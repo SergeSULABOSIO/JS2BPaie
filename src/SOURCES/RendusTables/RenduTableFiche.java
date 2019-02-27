@@ -80,7 +80,7 @@ public class RenduTableFiche implements TableCellRenderer {
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
         CelluleSimpleTableau cellule = null;
         String monnaie = getMonnaieRow(row);
         switch (column) {
@@ -103,43 +103,46 @@ public class RenduTableFiche implements TableCellRenderer {
                 cellule = new CelluleSimpleTableau(" " + getMonnaie(Integer.parseInt(value+"")) + " ", CelluleSimpleTableau.ALIGNE_GAUCHE, iconeEdition);
                 break;
             case 6://Salaire de base (+)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
+                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
             case 7://Transport (+)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
+                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
             case 8://Logement(+)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
+                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
             case 9://Autres gains(+)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
+                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
             case 10://TOTAL(+)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, null);
+                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, null);
                 break;
             case 11://ipr(-)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
+                cellule = new CelluleSimpleTableau("-" + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
             case 12://inss(-)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
+                cellule = new CelluleSimpleTableau("-" + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
             case 13://Syndicat(-)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
+                cellule = new CelluleSimpleTableau("-" + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
-            case 14://Cafétariat(-)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
+            case 14://Absence(-)
+                cellule = new CelluleSimpleTableau("-" + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
-            case 15://Avance sur Salaire(-)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
+            case 15://Cafétariat(-)
+                cellule = new CelluleSimpleTableau("-" + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
-            case 16://Ordinateur(-)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
+            case 16://Avance sur Salaire(-)
+                cellule = new CelluleSimpleTableau("-" + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
-            case 17://TOTAL(-)
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, null);
+            case 17://Ordinateur(-)
+                cellule = new CelluleSimpleTableau("-" + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, iconeEdition);
                 break;
-            case 18://NET A PAYER
-                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie, CelluleSimpleTableau.ALIGNE_DROITE, null);
+            case 18://TOTAL(-)
+                cellule = new CelluleSimpleTableau("-" + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, null);
+                break;
+            case 19://NET A PAYER
+                cellule = new CelluleSimpleTableau(" " + Util.getMontantFrancais(Double.parseDouble(value+"")) + " " + monnaie + " ", CelluleSimpleTableau.ALIGNE_DROITE, null);
                 break;
         }
         cellule.ecouterSelection(isSelected, row, getBeta(row), hasFocus);

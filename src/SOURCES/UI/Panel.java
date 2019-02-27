@@ -33,6 +33,8 @@ import SOURCES.Utilitaires.ParametreFichesDePaie;
 import SOURCES.Utilitaires.SortiesFichesDePaies;
 import SOURCES.Utilitaires.Util;
 import SOURCES.Utilitaires.XX_Fiche;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.PageSize;
 import com.toedter.calendar.JDateChooser;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
@@ -167,7 +169,6 @@ public class Panel extends javax.swing.JPanel {
                 actualiserTotaux("activerMoteurRecherche");
             }
         };
-
     }
 
     public InterfaceEntreprise getEntreprise() {
@@ -179,7 +180,11 @@ public class Panel extends javax.swing.JPanel {
     }
 
     public String getTitreDoc() {
-        return "FICHE";
+        if (typeExport == Panel.TYPE_EXPORT_SELECTION) {
+            return "BILLETIN DE PAIE";
+        } else {
+            return "ETAT DE PAIE DU PERSONNEL";
+        }
     }
 
     public Date getDateDocument() {
@@ -199,7 +204,7 @@ public class Panel extends javax.swing.JPanel {
     }
 
     private void initMonnaieTotaux() {
-        String labTaux = "Taux de change des monnaies enregistrées: ";
+        String labTaux = "Taux de change: ";
         InterfaceMonnaie monnaieLocal = null;
         combototMonnaie.removeAllItems();
         for (InterfaceMonnaie monnaie : parametreFichesDePaie.getMonnaies()) {
@@ -344,6 +349,14 @@ public class Panel extends javax.swing.JPanel {
     public String getTauxChange() {
         return labTauxDeChange.getText();
     }
+    
+    public int getCritereCategorie(){
+        return getCategorie((chCategorie.getSelectedItem()+"").trim());
+    }
+    
+    public String getCritereMois(){
+        return "Tous les Mois de 2019";
+    }
 
     private void actualiserTotaux(String methode) {
         System.out.println("actualiserTotaux - " + methode);
@@ -384,7 +397,7 @@ public class Panel extends javax.swing.JPanel {
         this.tableListeFichesDePaie.setDefaultRenderer(Object.class, new RenduTableFiche(icones.getModifier_01(), parametreFichesDePaie, modeleListeFiches));
         this.tableListeFichesDePaie.setRowHeight(25);
 
-        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(0), 30, true, null);//N°
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(1), 110, true, new EditeurDate());//Date
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(2), 100, false, null);//Mois
@@ -399,11 +412,12 @@ public class Panel extends javax.swing.JPanel {
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(11), 100, true, null);//ipr
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(12), 100, true, null);//inss
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(13), 100, true, null);//Syndicat
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(14), 100, true, null);//Cafétariat
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(15), 100, true, null);//Avance sur salaire
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(16), 100, true, null);//Ordinateur
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(17), 120, true, null);//TOTAL(-)
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(18), 120, true, null);//NET A PAYER
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(14), 100, true, null);//Absence
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(15), 100, true, null);//Cafétariat
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(16), 100, true, null);//Avance sur salaire
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(17), 100, true, null);//Ordinateur
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(18), 120, true, null);//TOTAL(-)
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(19), 120, true, null);//NET A PAYER
 
         //On écoute les sélction
         this.tableListeFichesDePaie.getSelectionModel().addListSelectionListener(new ListSelectionListener() {

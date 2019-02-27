@@ -25,7 +25,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class ModeleListeFiches extends AbstractTableModel {
 
-    private String[] titreColonnes = {"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+    private String[] titreColonnes = {"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
     private Vector<InterfaceFiche> listeData = new Vector<>();
     private Vector<InterfaceFiche> listeDataExclus = new Vector<>();
     private JScrollPane parent;
@@ -208,7 +208,7 @@ public class ModeleListeFiches extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
         InterfaceFiche Ifiche = listeData.elementAt(rowIndex);
         switch (columnIndex) {
             case 0: //N°
@@ -239,15 +239,17 @@ public class ModeleListeFiches extends AbstractTableModel {
                 return Ifiche.getRetenu_INSS();
             case 13: //SYNDICAT(-)
                 return Ifiche.getRetenu_SYNDICAT();
-            case 14: //CAFETARIAT(-)
+            case 14: //ABSENCE(-)
+                return Ifiche.getRetenu_ABSENCE();
+            case 15: //CAFETARIAT(-)
                 return Ifiche.getRetenu_CAFETARIAT();
-            case 15: //AVANCE SUR SALAIRE(-)
+            case 16: //AVANCE SUR SALAIRE(-)
                 return Ifiche.getRetenu_AVANCE_SALAIRE();
-            case 16: //ORDINATEUR(-)
+            case 17: //ORDINATEUR(-)
                 return Ifiche.getRetenu_ORDINATEUR();
-            case 17: //TOTAL(-)
+            case 18: //TOTAL(-)
                 return Util.getTotalRetenu(Ifiche);
-            case 18: //NET A PAYER
+            case 19: //NET A PAYER
                 return Util.getNetAPayer(Ifiche);
             default:
                 return "Null";
@@ -256,7 +258,7 @@ public class ModeleListeFiches extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
         switch (columnIndex) {
             case 0: //N°
                 return Integer.class;
@@ -286,15 +288,17 @@ public class ModeleListeFiches extends AbstractTableModel {
                 return Double.class;
             case 13: //SYNDICAT(-)
                 return Double.class;
-            case 14: //CAFETARIAT(-)
+            case 14: //ABSENCE(-)
                 return Double.class;
-            case 15: //AVANCE SUR SALAIRE(-)
+            case 15: //CAFETARIAT(-)
                 return Double.class;
-            case 16: //ORDINATEUR(-)
+            case 16: //AVANCE SUR SALAIRE(-)
                 return Double.class;
-            case 17: //TOTAL(-)
+            case 17: //ORDINATEUR(-)
                 return Double.class;
-            case 18: //NET A PAYER
+            case 18: //TOTAL(-)
+                return Double.class;
+            case 19: //NET A PAYER
                 return Double.class;
             default:
                 return Object.class;
@@ -303,7 +307,7 @@ public class ModeleListeFiches extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
         if (columnIndex == 0 || columnIndex == 4 || columnIndex == 10 || columnIndex == 17 || columnIndex == 18) {
             return false;
         } else {
@@ -334,7 +338,7 @@ public class ModeleListeFiches extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base(+)", "Transport(+)", "Logement(+)", "Autres gains(+)", "TOTAL(+)", "Ipr(-)", "Inss(-)", "Syndicat(-)", "Cafétariat(-)", "Av. Salaire(-)", "Ordinateur(-)", "TOTAL(-)", "NET A PAYER"};
+        //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
         InterfaceFiche Ifiche = listeData.get(rowIndex);
         String avant = Ifiche.toString();
         switch (columnIndex) {
@@ -377,13 +381,16 @@ public class ModeleListeFiches extends AbstractTableModel {
             case 13://Syndicat
                 Ifiche.setRetenu_SYNDICAT(Double.parseDouble(aValue + ""));
                 break;
-            case 14://CAfétariat
+            case 14://Absence
+                Ifiche.setRetenu_ABSENCE(Double.parseDouble(aValue + ""));
+                break;
+            case 15://CAfétariat
                 Ifiche.setRetenu_CAFETARIAT(Double.parseDouble(aValue + ""));
                 break;
-            case 15://Avance sur Salaire
+            case 16://Avance sur Salaire
                 Ifiche.setRetenu_AVANCE_SALAIRE(Double.parseDouble(aValue + ""));
                 break;
-            case 16://Ordinateur
+            case 17://Ordinateur
                 Ifiche.setRetenu_ORDINATEUR(Double.parseDouble(aValue + ""));
                 break;
             default:
