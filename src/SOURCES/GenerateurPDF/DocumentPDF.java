@@ -316,9 +316,9 @@ public class DocumentPDF extends PdfPageEventHelper {
         try {
             PdfPTable tableau = new PdfPTable(widths.length);
             if (totalWidth == -1) {
-                if(gestionnairePaie.getTypeExport() == Panel.TYPE_EXPORT_SELECTION){
+                if (gestionnairePaie.getTypeExport() == Panel.TYPE_EXPORT_SELECTION) {
                     tableau.setTotalWidth(PageSize.A4.getWidth() - 72);
-                }else{
+                } else {
                     tableau.setTotalWidth(PageSize.A4.rotate().getWidth() - 72);
                 }
             } else {
@@ -330,9 +330,9 @@ public class DocumentPDF extends PdfPageEventHelper {
             if (titres != null) {
                 tableau.setSpacingBefore(3);
                 for (String titre : titres) {
-                    if(gestionnairePaie.getTypeExport() == Panel.TYPE_EXPORT_SELECTION){
+                    if (gestionnairePaie.getTypeExport() == Panel.TYPE_EXPORT_SELECTION) {
                         tableau.addCell(getCelluleTableau(titre, borderWidth, BaseColor.LIGHT_GRAY, null, Element.ALIGN_CENTER, Font_TexteSimple_Gras));
-                    }else{
+                    } else {
                         tableau.addCell(getCelluleTableau(titre, borderWidth, BaseColor.LIGHT_GRAY, null, Element.ALIGN_CENTER, Font_TexteSimple_petit_Gras));
                     }
                 }
@@ -349,7 +349,7 @@ public class DocumentPDF extends PdfPageEventHelper {
         for (InterfaceAgent Iagent : gestionnairePaie.getParametreFichesDePaie().getAgents()) {
             if (idAgent == Iagent.getId()) {
                 String initialPren = Iagent.getPrenom().trim();
-                if(initialPren.length() != 0){
+                if (initialPren.length() != 0) {
                     initialPren = initialPren.substring(0, 1) + ".";
                 }
                 return Iagent.getNom() + " " + Iagent.getPostnom() + " " + initialPren;
@@ -410,10 +410,19 @@ public class DocumentPDF extends PdfPageEventHelper {
         }
         return "CATEGORIES D'AGENTS(*)";
     }
-    
-    private boolean contienAgent(int categorie){
-        for(InterfaceFiche Iagent : sortiesFichesDePaies.getListeFichesDePaie()){
-            if(categorie == Iagent.getCategorieAgent()){
+
+    private boolean contientAgent(int categorie) {
+        for (InterfaceFiche Iagent : sortiesFichesDePaies.getListeFichesDePaie()) {
+            if (categorie == Iagent.getCategorieAgent()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean contientMois(String mois) {
+        for (InterfaceFiche Iagent : sortiesFichesDePaies.getListeFichesDePaie()) {
+            if (Iagent.getMois().equals(mois)) {
                 return true;
             }
         }
@@ -421,123 +430,112 @@ public class DocumentPDF extends PdfPageEventHelper {
     }
 
     private void setTableauGrilleDePaie() {
-        /* */
-        //{"N°", "Date", "Destination", "Reference", "Motif", "Nature", "Effectué par", "Montant", "Monnaie"}
         try {
             if (sortiesFichesDePaies != null) {
                 String criPeriode = "Entre " + Util.getDateFrancais(Util.getDate_CeMatin(gestionnairePaie.getCritereDateDebut())) + " et " + Util.getDateFrancais(Util.getDate_ZeroHeure(gestionnairePaie.getCritereFin()));
                 String criMonnaie = gestionnairePaie.getMonnaieOutput();
                 String criCategorie = getCategorieAgentI(gestionnairePaie.getCritereCategorie());
                 String criMois = gestionnairePaie.getCritereMois();
-                if (gestionnairePaie.getCritereCategorie() == -1) {
-                    /*
-                        On a besoin d'afficher toutes les catégories, alors il faut les regrouper
-                        Constantes - CATEGORIE
-                        CATEGORIE_ADMINISTRATION_1 = 0;
-                        CATEGORIE_ADMINISTRATION_2 = 1;
-                        CATEGORIE_MATERNELLE = 2;
-                        CATEGORIE_PARTIEL = 3;
-                        CATEGORIE_PRIMAIRE = 4;
-                        CATEGORIE_PRIME = 5; 
-                        CATEGORIE_SECONDAIRE = 6;
-                        CATEGORIE_SURVEILLANT = 7;
-                     */
-                    for (int iCategorieAgent = 0; iCategorieAgent < 8; iCategorieAgent++) {
-                        if(contienAgent(iCategorieAgent) == false){
-                            //S'il n'y a pas de fiche de paie pour cette catégorie d'agents alors on saute pour ne pas afficher de tableau vide
-                            continue;
-                        }
-                        
-                        String nomCategorieAgents = getCategorieAgentI(iCategorieAgent);
-                        document.add(getParagraphe(nomCategorieAgents, Font_TexteSimple_Gras_Italique, Element.ALIGN_LEFT));
-                        document.add(getParagraphe(criMois + " || " + criMonnaie, Font_TexteSimple_petit, Element.ALIGN_LEFT));
 
-                        //private String[] titreColonnes = {};
-                        PdfPTable tableEtatDePaie = getTableau(
-                                -1,
-                                new String[]{"N°", "Date", "Mois", "Agents", "Base", "Transp.", "Logement", "Autr. gains", "Total", "Ipr", "Inss", "Syndicat", "Absence", "Cafetariat", "Av. Salaire", "Ordinat.", "Total", "Net à Payer"},
-                                new int[]{30, 110, 100, 230, 100, 100, 100, 100, 110, 100, 100, 100, 100, 100, 100, 100, 110, 110},
-                                Element.ALIGN_CENTER,
-                                0.2f
-                        );
-                        int iLigne = 0;
-                        double totB = 0;
-                        double base = 0, transp = 0, loge = 0, gains = 0;
-                        double ipr = 0, inss = 0, syndicat = 0, cafetariat = 0, avanceSal = 0, ordinateur = 0, absence = 0;
-                        double totR = 0;
-                        double totN = 0;
-
-                        for (InterfaceFiche Ifiche : sortiesFichesDePaies.getListeFichesDePaie()) {
-                            if (Ifiche.getCategorieAgent() == iCategorieAgent) {
-                                totB += Util.getTotalAPayer(Ifiche);
-                                totR += Util.getTotalRetenu(Ifiche);
-                                totN += Util.getNetAPayer(Ifiche);
-                                String monnaieLine = getMonnaie(Ifiche.getIdMonnaie());
-                                
-                                base += Ifiche.getSalaireBase();
-                                transp += Ifiche.getTransport();
-                                loge += Ifiche.getLogement();
-                                gains += Ifiche.getAutresGains();
-                                
-                                ipr += Ifiche.getRetenu_IPR();
-                                inss += Ifiche.getRetenu_INSS();
-                                syndicat += Ifiche.getRetenu_SYNDICAT();
-                                cafetariat += Ifiche.getRetenu_CAFETARIAT();
-                                absence += Ifiche.getRetenu_ABSENCE();
-                                avanceSal += Ifiche.getRetenu_AVANCE_SALAIRE();
-                                ordinateur += Ifiche.getRetenu_ORDINATEUR();
-                                
-                                
-                                tableEtatDePaie.addCell(getCelluleTableau("" + (iLigne + 1), 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau(Util.getDateFrancais(Ifiche.getDateEnregistrement()), 0.2f, BaseColor.WHITE, null, Element.ALIGN_LEFT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau(Ifiche.getMois(), 0.2f, BaseColor.WHITE, null, Element.ALIGN_LEFT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau(getAgent(Ifiche.getIdAgent()), 0.2f, BaseColor.WHITE, null, Element.ALIGN_LEFT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Ifiche.getSalaireBase()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Ifiche.getTransport()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Ifiche.getLogement()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Ifiche.getAutresGains()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Util.getTotalAPayer(Ifiche)) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit_Gras));
-                                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_IPR()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_INSS()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_SYNDICAT()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_ABSENCE()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_CAFETARIAT()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_AVANCE_SALAIRE()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_ORDINATEUR()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
-                                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Util.getTotalRetenu(Ifiche)) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit_Gras));
-                                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Util.getNetAPayer(Ifiche)) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit_Gras));
-                                //incrémentaion
-                                iLigne++;
-                            }
-                        }
-                        //La dernière ligne du table
-                        String[] bruts = new String[6];
-                        bruts[0] = Util.getMontantFrancais(base) + " " + gestionnairePaie.getMonnaieOutput();
-                        bruts[1] = Util.getMontantFrancais(transp) + " " + gestionnairePaie.getMonnaieOutput();
-                        bruts[2] = Util.getMontantFrancais(loge) + " " + gestionnairePaie.getMonnaieOutput();
-                        bruts[3] = Util.getMontantFrancais(gains) + " " + gestionnairePaie.getMonnaieOutput();
-
-                        String[] retenus = new String[7];
-                        retenus[0] = ipr + " " + gestionnairePaie.getMonnaieOutput();
-                        retenus[1] = inss + " " + gestionnairePaie.getMonnaieOutput();
-                        retenus[2] = syndicat + " " + gestionnairePaie.getMonnaieOutput();
-                        retenus[3] = absence + " " + gestionnairePaie.getMonnaieOutput();
-                        retenus[4] = cafetariat + " " + gestionnairePaie.getMonnaieOutput();
-                        retenus[5] = avanceSal + " " + gestionnairePaie.getMonnaieOutput();
-                        retenus[6] = ordinateur + " " + gestionnairePaie.getMonnaieOutput();
-
-                        String totBrut = Util.getMontantFrancais(gestionnairePaie.getTotBrut()) + " " + gestionnairePaie.getMonnaieOutput();
-                        String totRetenus = Util.getMontantFrancais(gestionnairePaie.getTotRetenu()) + " " + gestionnairePaie.getMonnaieOutput();
-                        String totNetAPayer = Util.getMontantFrancais(gestionnairePaie.getTotNet()) + " " + gestionnairePaie.getMonnaieOutput();
-
-                        setDerniereLigne(tableEtatDePaie, bruts, totBrut, retenus, totRetenus, totNetAPayer);
-
-                        document.add(tableEtatDePaie);
+                for (int iCategorieAgent = 0; iCategorieAgent < 8; iCategorieAgent++) {
+                    for (String Omois : Util.getListeMois(gestionnairePaie.parametreFichesDePaie.getExercice().getDebut(), gestionnairePaie.parametreFichesDePaie.getExercice().getFin())) {
+                        chargerElements(iCategorieAgent, Omois, criMonnaie);
                     }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void chargerElements(int iCategorieAgent, String Omois, String criMonnaie) throws Exception {
+        //private String[] titreColonnes = {};
+        PdfPTable tableEtatDePaie = getTableau(
+                -1,
+                new String[]{"N°", "Date", "Mois", "Agents", "Base", "Transp.", "Logement", "Autr. gains", "Total", "Ipr", "Inss", "Syndicat", "Absence", "Cafetariat", "Av. Salaire", "Ordinat.", "Total", "Net à Payer"},
+                new int[]{30, 110, 100, 230, 100, 100, 100, 100, 110, 100, 100, 100, 100, 100, 100, 100, 110, 110},
+                Element.ALIGN_CENTER,
+                0.2f
+        );
+        int iLigne = 0;
+        double totB = 0;
+        double base = 0, transp = 0, loge = 0, gains = 0;
+        double ipr = 0, inss = 0, syndicat = 0, cafetariat = 0, avanceSal = 0, ordinateur = 0, absence = 0;
+        double totR = 0;
+        double totN = 0;
+        boolean isEmpty = true;
+        for (InterfaceFiche Ifiche : sortiesFichesDePaies.getListeFichesDePaie()) {
+            if (Ifiche.getCategorieAgent() == iCategorieAgent && Ifiche.getMois().equals(Omois)) {
+                totB += Util.getTotalAPayer(Ifiche);
+                totR += Util.getTotalRetenu(Ifiche);
+                totN += Util.getNetAPayer(Ifiche);
+                String monnaieLine = getMonnaie(Ifiche.getIdMonnaie());
+                base += Ifiche.getSalaireBase();
+                transp += Ifiche.getTransport();
+                loge += Ifiche.getLogement();
+                gains += Ifiche.getAutresGains();
+                ipr += Ifiche.getRetenu_IPR();
+                inss += Ifiche.getRetenu_INSS();
+                syndicat += Ifiche.getRetenu_SYNDICAT();
+                cafetariat += Ifiche.getRetenu_CAFETARIAT();
+                absence += Ifiche.getRetenu_ABSENCE();
+                avanceSal += Ifiche.getRetenu_AVANCE_SALAIRE();
+                ordinateur += Ifiche.getRetenu_ORDINATEUR();
+                tableEtatDePaie.addCell(getCelluleTableau("" + (iLigne + 1), 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau(Util.getDateFrancais(Ifiche.getDateEnregistrement()), 0.2f, BaseColor.WHITE, null, Element.ALIGN_LEFT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau(Ifiche.getMois(), 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau(getAgent(Ifiche.getIdAgent()), 0.2f, BaseColor.WHITE, null, Element.ALIGN_LEFT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Ifiche.getSalaireBase()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Ifiche.getTransport()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Ifiche.getLogement()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Ifiche.getAutresGains()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Util.getTotalAPayer(Ifiche)) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit_Gras));
+                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_IPR()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_INSS()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_SYNDICAT()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_ABSENCE()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_CAFETARIAT()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_AVANCE_SALAIRE()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Ifiche.getRetenu_ORDINATEUR()) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit));
+                tableEtatDePaie.addCell(getCelluleTableau("-" + Util.getMontantFrancais(Util.getTotalRetenu(Ifiche)) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit_Gras));
+                tableEtatDePaie.addCell(getCelluleTableau(Util.getMontantFrancais(Util.getNetAPayer(Ifiche)) + " " + monnaieLine, 0.2f, BaseColor.WHITE, null, Element.ALIGN_RIGHT, Font_TexteSimple_petit_Gras));
+                //incrémentaion
+                iLigne++;
+                isEmpty = false;
+            }
+        }
+        if (isEmpty == false) {
+            //La dernière ligne du table
+            double toBrut = 0;
+            double toRet = 0;
+            
+            String[] bruts = new String[6];
+            bruts[0] = Util.getMontantFrancais(base) + " " + gestionnairePaie.getMonnaieOutput();
+            bruts[1] = Util.getMontantFrancais(transp) + " " + gestionnairePaie.getMonnaieOutput();
+            bruts[2] = Util.getMontantFrancais(loge) + " " + gestionnairePaie.getMonnaieOutput();
+            bruts[3] = Util.getMontantFrancais(gains) + " " + gestionnairePaie.getMonnaieOutput();
+            
+            toBrut = base + transp + loge + gains;
+            
+            String[] retenus = new String[7];
+            retenus[0] = ipr + " " + gestionnairePaie.getMonnaieOutput();
+            retenus[1] = inss + " " + gestionnairePaie.getMonnaieOutput();
+            retenus[2] = syndicat + " " + gestionnairePaie.getMonnaieOutput();
+            retenus[3] = absence + " " + gestionnairePaie.getMonnaieOutput();
+            retenus[4] = cafetariat + " " + gestionnairePaie.getMonnaieOutput();
+            retenus[5] = avanceSal + " " + gestionnairePaie.getMonnaieOutput();
+            retenus[6] = ordinateur + " " + gestionnairePaie.getMonnaieOutput();
+            
+            toRet = ipr + inss + syndicat + absence + cafetariat + avanceSal + ordinateur;
+            
+            String totBrut = Util.getMontantFrancais(toBrut) + " " + gestionnairePaie.getMonnaieOutput();
+            String totRetenus = Util.getMontantFrancais(toRet) + " " + gestionnairePaie.getMonnaieOutput();
+            String totNetAPayer = Util.getMontantFrancais(toBrut - toRet) + " " + gestionnairePaie.getMonnaieOutput();
+            setDerniereLigne(tableEtatDePaie, bruts, totBrut, retenus, totRetenus, totNetAPayer);
+
+            document.add(getParagraphe(getCategorieAgentI(iCategorieAgent), Font_TexteSimple_Gras_Italique, Element.ALIGN_LEFT));
+            document.add(getParagraphe("Mois: " + Omois + " || Monnaie: " + criMonnaie, Font_TexteSimple_petit, Element.ALIGN_LEFT));
+            document.add(tableEtatDePaie);
         }
     }
 

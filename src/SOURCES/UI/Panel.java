@@ -19,6 +19,7 @@ import SOURCES.CallBack.EcouteurUpdateClose;
 import SOURCES.CallBack.EcouteurValeursChangees;
 import SOURCES.EditeurTable.EditeurAgents;
 import SOURCES.EditeurTable.EditeurDate;
+import SOURCES.EditeurTable.EditeurMois;
 import SOURCES.EditeurTable.EditeurMonnaie;
 import SOURCES.GenerateurPDF.DocumentPDF;
 import SOURCES.Interface.InterfaceAgent;
@@ -117,7 +118,13 @@ public class Panel extends javax.swing.JPanel {
         chRecherche.setTextInitial("Recherche : Saisissez votre mot clé ici, puis tapez ENTER");
         chEntre.setDate(this.parametreFichesDePaie.getExercice().getDebut());
         chEt.setDate(this.parametreFichesDePaie.getExercice().getFin());
-
+        
+        chMois.removeAllItems();
+        chMois.addItem("TOUS LES MOIS");
+        for(String Omois: Util.getListeMois(this.parametreFichesDePaie.getExercice().getDebut(), this.parametreFichesDePaie.getExercice().getFin())){
+            chMois.addItem(Omois);
+        }
+        
         ecouterChangementDate(chEt);
         ecouterChangementDate(chEntre);
     }
@@ -165,7 +172,7 @@ public class Panel extends javax.swing.JPanel {
             @Override
             public void chercher(String motcle) {
                 //On extrait les critère de filtrage des Encaissements
-                modeleListeFiches.chercher(Util.getDate_CeMatin(chEntre.getDate()), Util.getDate_ZeroHeure(chEt.getDate()), motcle, getCategorie(chCategorie.getSelectedItem() + ""));
+                modeleListeFiches.chercher(chMois.getSelectedItem()+"", Util.getDate_CeMatin(chEntre.getDate()), Util.getDate_ZeroHeure(chEt.getDate()), motcle, getCategorie(chCategorie.getSelectedItem() + ""));
                 actualiserTotaux("activerMoteurRecherche");
             }
         };
@@ -355,7 +362,7 @@ public class Panel extends javax.swing.JPanel {
     }
     
     public String getCritereMois(){
-        return "Tous les Mois de 2019";
+        return chMois.getSelectedItem()+"";
     }
 
     private void actualiserTotaux(String methode) {
@@ -400,7 +407,7 @@ public class Panel extends javax.swing.JPanel {
         //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(0), 30, true, null);//N°
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(1), 110, true, new EditeurDate());//Date
-        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(2), 100, false, null);//Mois
+        setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(2), 100, false, new EditeurMois(parametreFichesDePaie));//Mois
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(3), 200, false, new EditeurAgents(parametreFichesDePaie));//Agent
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(4), 150, false, null);//Catégorie
         setTaille(this.tableListeFichesDePaie.getColumnModel().getColumn(5), 80, false, new EditeurMonnaie(parametreFichesDePaie));//Monnaie
@@ -915,6 +922,7 @@ public class Panel extends javax.swing.JPanel {
         chCategorie = new javax.swing.JComboBox<>();
         chEntre = new com.toedter.calendar.JDateChooser();
         chEt = new com.toedter.calendar.JDateChooser();
+        chMois = new javax.swing.JComboBox<>();
         panSelected = new javax.swing.JPanel();
         labSalBrutSelected = new javax.swing.JLabel();
         labSalRetenuSelected = new javax.swing.JLabel();
@@ -1012,6 +1020,13 @@ public class Panel extends javax.swing.JPanel {
         chEt.setDateFormatString("dd MMM yyyy");
         chEt.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
 
+        chMois.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        chMois.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chMoisItemStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelCriteres_categorieLayout = new javax.swing.GroupLayout(panelCriteres_categorie);
         panelCriteres_categorie.setLayout(panelCriteres_categorieLayout);
         panelCriteres_categorieLayout.setHorizontalGroup(
@@ -1023,6 +1038,8 @@ public class Panel extends javax.swing.JPanel {
                 .addComponent(chEt, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chCategorie, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chMois, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         panelCriteres_categorieLayout.setVerticalGroup(
@@ -1030,7 +1047,9 @@ public class Panel extends javax.swing.JPanel {
             .addGroup(panelCriteres_categorieLayout.createSequentialGroup()
                 .addGap(5, 5, 5)
                 .addGroup(panelCriteres_categorieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chCategorie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(panelCriteres_categorieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(chCategorie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(chMois, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(panelCriteres_categorieLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(chEt, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(chEntre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -1178,7 +1197,7 @@ public class Panel extends javax.swing.JPanel {
                             .addComponent(labInfos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(chRecherche, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(28, 243, Short.MAX_VALUE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(combototMonnaie, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
@@ -1255,12 +1274,22 @@ public class Panel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_chCategorieItemStateChanged
 
+    private void chMoisItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chMoisItemStateChanged
+        // TODO add your handling code here:
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            if (gestionnaireRecherche != null) {
+                gestionnaireRecherche.demarrerRecherche();
+            }
+        }
+    }//GEN-LAST:event_chMoisItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar barreOutils;
     private javax.swing.JComboBox<String> chCategorie;
     private com.toedter.calendar.JDateChooser chEntre;
     private com.toedter.calendar.JDateChooser chEt;
+    private javax.swing.JComboBox<String> chMois;
     private UI.JS2bTextField chRecherche;
     private javax.swing.JComboBox<String> combototMonnaie;
     private javax.swing.JButton jButton5;

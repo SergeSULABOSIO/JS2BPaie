@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Vector;
 
 /**
  *
@@ -202,8 +203,25 @@ public class Util {
         }
         return texte;
     }
+    
+    public static Vector<String> getListeMois(Date dateDebut, Date dateFinale){
+        Vector<String> listeMois = new Vector();
+        Date dateAmovible = (Date)dateDebut.clone();
+        
+        listeMois.addElement("" + Util.getDateFrancais_Mois(dateAmovible));
+        while(dateAmovible.before(dateFinale)){
+            dateAmovible.setMonth(dateAmovible.getMonth() + 1);
+            //System.out.println(" ** " + Util.getDateFrancais(dateAmovible));
+            String moisEncours = Util.getDateFrancais_Mois(dateAmovible);
+            if(!listeMois.contains(moisEncours)){
+                listeMois.addElement(moisEncours);
+            }
+        }
+        return listeMois;
+    }
 
     public static void main(String[] args) {
+        /*
         double origine = 10000.14;
         
         String res = Util.getMontantFrancais(origine);
@@ -212,5 +230,22 @@ public class Util {
         
         System.out.println("Mois: " + Util.getDateFrancais(new Date()));
         System.out.println("Mois: " + Util.getDateFrancais_Mois(new Date()));
+        */
+        
+        Date dateA = new Date(119, 1, 26);
+        Date dateB = new Date(120, 11, 26);
+        /*
+        System.out.println("Date A: " + Util.getDateFrancais(dateA));
+        System.out.println("Date B: " + Util.getDateFrancais(dateB));
+        dateA.setMonth(dateA.getMonth()-1);
+        System.out.println("Date modifiée: " + Util.getDateFrancais(dateA));
+        */
+        System.out.println("Date A: " + Util.getDateFrancais(dateA));
+        System.out.println("Date B: " + Util.getDateFrancais(dateB));
+        System.out.println("");
+        Vector<String> liste = Util.getListeMois(dateA, dateB);
+        for(String Omois: liste){
+            System.out.println(" * " + Omois);
+        }
     }
 }

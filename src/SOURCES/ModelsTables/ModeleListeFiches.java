@@ -43,16 +43,29 @@ public class ModeleListeFiches extends AbstractTableModel {
     }
 
     
-    public void chercher(Date dateA, Date dateB, String motcle, int idCategorie) {
+    public void chercher(String mois, Date dateA, Date dateB, String motcle, int idCategorie) {
         this.listeData.addAll(this.listeDataExclus);
         this.listeDataExclus.removeAllElements();
         for (InterfaceFiche Ific : this.listeData) {
             if (Ific != null) {
-                search_verifier_periode(Ific, dateA, dateB, motcle, idCategorie);
+                search_verifier_mois(Ific, mois, dateA, dateB, motcle, idCategorie);
             }
         }
         //En fin, on va nettoyer la liste - en enlevant tout objet qui a été black listé
         search_nettoyer();
+    }
+    
+    private void search_verifier_mois(InterfaceFiche Ifiche, String mois, Date dateA, Date dateB, String motcle, int idCategorie) {
+        //System.out.println("Ifiche = " + Ifiche.getCategorieAgent());
+        //System.out.println("idCategorie = " + idCategorie);
+        if (Ifiche != null) {
+            if (mois.trim().startsWith("TOU") == true) {
+                //On ne fait rien
+            } else if (!Ifiche.getMois().equals(mois)) {
+                search_blacklister(Ifiche);
+            }
+            search_verifier_periode(Ifiche, dateA, dateB, motcle, idCategorie);
+        }
     }
     
     private void search_verifier_periode(InterfaceFiche Ifiche, Date dateA, Date dateB, String motcle, int idCategorie) {
