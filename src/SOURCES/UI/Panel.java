@@ -91,6 +91,8 @@ public class Panel extends javax.swing.JPanel {
     public static final int TYPE_EXPORT_TOUT = 0;
     public static final int TYPE_EXPORT_SELECTION = 1;
     public int typeExport = TYPE_EXPORT_TOUT;
+    private InterfaceAgent SelectedAgent = null;
+    private InterfaceFiche SelectedFichePaie = null;
 
     public Panel(JTabbedPane parent, DonneesFicheDePaie donneesFiche, ParametreFichesDePaie parametreFichesDePaie, EcouteurPaie ecouteurPaie) {
         this.initComponents();
@@ -442,26 +444,35 @@ public class Panel extends javax.swing.JPanel {
         }
     }
 
+    public InterfaceAgent getSelectedAgent() {
+        return SelectedAgent;
+    }
+
+    public InterfaceFiche getSelectedFichePaie() {
+        return SelectedFichePaie;
+    }
+    
+
     private void ecouterAgentSelectionne() {
         int ligneSelected = tableListeFichesDePaie.getSelectedRow();
         if (ligneSelected != -1) {
-            InterfaceFiche Ifiche = modeleListeFiches.getFiche(ligneSelected);
-            if (Ifiche != null) {
-                InterfaceAgent IAgent = getAgent(Ifiche.getIdAgent());
-                if (IAgent != null) {
+            this.SelectedFichePaie = modeleListeFiches.getFiche(ligneSelected);
+            if (SelectedFichePaie != null) {
+                this.SelectedAgent = getAgent(SelectedFichePaie.getIdAgent());
+                if (SelectedAgent != null) {
                     btPDFSynth.setText("Prod. Bulletin", 12, true);
                     btPDFSynth.appliquerDroitAccessDynamique(true);
-                    mPDFSynth.setText("Produire le bulletin de " + IAgent.getNom() + " " + IAgent.getPrenom());
+                    mPDFSynth.setText("Produire le bulletin de " + SelectedAgent.getNom() + " " + SelectedAgent.getPrenom());
                     mPDFSynth.appliquerDroitAccessDynamique(true);
-                    renameTitrePaneAgent("Sélection - " + IAgent.getNom() + " " + IAgent.getPostnom() + " " + IAgent.getPrenom());
+                    renameTitrePaneAgent("Sélection - " + SelectedAgent.getNom() + " " + SelectedAgent.getPostnom() + " " + SelectedAgent.getPrenom());
 
-                    String SAgent = IAgent.getNom() + " " + IAgent.getPostnom() + " " + IAgent.getPrenom();
-                    InterfaceMonnaie Imon = getMonnaie(Ifiche.getIdMonnaie());
+                    String SAgent = SelectedAgent.getNom() + " " + SelectedAgent.getPostnom() + " " + SelectedAgent.getPrenom();
+                    InterfaceMonnaie Imon = getMonnaie(SelectedFichePaie.getIdMonnaie());
                     String monnaie = Imon.getCode();
-                    double nett = Util.getNetAPayer(Ifiche);
+                    double nett = Util.getNetAPayer(SelectedFichePaie);
                     String net = Util.getMontantFrancais(nett);
                     String netLettre = Util.getMontantLettres(nett, Imon.getNom());
-                    this.ecouteurClose.onActualiser(SAgent + ", Paie de " + Ifiche.getMois() + ", Net à Payer: " + net + " " + monnaie + " (" + netLettre + ").", icones.getClient_01());
+                    this.ecouteurClose.onActualiser(SAgent + ", Paie de " + SelectedFichePaie.getMois() + ", Net à Payer: " + net + " " + monnaie + " (" + netLettre + ").", icones.getClient_01());
 
                 } else {
                     desactiverBts();
