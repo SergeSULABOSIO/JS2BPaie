@@ -34,8 +34,6 @@ import SOURCES.Utilitaires.ParametreFichesDePaie;
 import SOURCES.Utilitaires.SortiesFichesDePaies;
 import SOURCES.Utilitaires.Util;
 import SOURCES.Utilitaires.XX_Fiche;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.PageSize;
 import com.toedter.calendar.JDateChooser;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
