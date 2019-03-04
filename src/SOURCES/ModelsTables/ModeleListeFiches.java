@@ -321,7 +321,7 @@ public class ModeleListeFiches extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
-        if (columnIndex == 0 || columnIndex == 4 || columnIndex == 10 || columnIndex == 17 || columnIndex == 18) {
+        if (columnIndex == 0 || columnIndex == 4 || columnIndex == 10 || columnIndex == 18 || columnIndex == 19) {
             return false;
         } else {
             return true;
