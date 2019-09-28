@@ -167,7 +167,7 @@ public class PrincipalPaie extends javax.swing.JFrame {
             }
 
             @Override
-            public void onDetruitElement(int idElement) {
+            public void onDetruitElement(int idElement, long signature) {
                 System.out.println("ON DETRUIT TOUTES LA FICHE " + idElement);
             }
 

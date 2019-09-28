@@ -683,7 +683,7 @@ public class PanelPaie extends javax.swing.JPanel {
                 modeleListeFiches.SupprimerFiche(tableListeFichesDePaie.getSelectedRow(), new EcouteurSuppressionElement() {
                     @Override
                     public void onSuppressionConfirmee(int idElement, long signature) {
-                        ecouteurPaie.onDetruitElement(idElement);
+                        ecouteurPaie.onDetruitElement(idElement, signature);
                     }
                 });
                 break;
