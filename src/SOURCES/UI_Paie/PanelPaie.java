@@ -41,6 +41,7 @@ import Source.Objet.CouleurBasique;
 import Source.Objet.Entreprise;
 import Source.Objet.Fiche;
 import Source.Objet.Monnaie;
+import Source.Objet.UtilObjet;
 import Source.Objet.Utilisateur;
 import Source.UI.NavigateurPages;
 import com.toedter.calendar.JDateChooser;
@@ -649,7 +650,7 @@ public class PanelPaie extends javax.swing.JPanel {
                         int beta = InterfaceFiche.BETA_NOUVEAU;
                         String mois = UtilPaie.getDateFrancais_Mois(dateEnreg);
 
-                        modeleListeFiches.AjouterFichet(new Fiche(id, idEntreprise, idUtilisateur, idExercice, idMonnaie, idAgent, InterfaceAgent.CATEGORIE_ADMINISTRATION_1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dateEnreg, mois, beta));
+                        modeleListeFiches.AjouterFichet(new Fiche(id, idEntreprise, idUtilisateur, idExercice, idMonnaie, idAgent, InterfaceAgent.CATEGORIE_ADMINISTRATION_1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dateEnreg, mois, UtilObjet.getSignature(), beta));
                         //On sélectionne la première ligne
                         tableListeFichesDePaie.setRowSelectionInterval(0, 0);
                     }
@@ -681,7 +682,7 @@ public class PanelPaie extends javax.swing.JPanel {
             case 0: //Tab Encaissement
                 modeleListeFiches.SupprimerFiche(tableListeFichesDePaie.getSelectedRow(), new EcouteurSuppressionElement() {
                     @Override
-                    public void onSuppressionConfirmee(int idElement) {
+                    public void onSuppressionConfirmee(int idElement, long signature) {
                         ecouteurPaie.onDetruitElement(idElement);
                     }
                 });
