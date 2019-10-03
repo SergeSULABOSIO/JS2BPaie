@@ -64,6 +64,7 @@ public class PrincipalPaie extends javax.swing.JFrame {
         initComponents();
         icones = new Icones();
         this.setIconImage(icones.getAdresse_03().getImage());
+        //Rien à faire
     }
 
     /**
