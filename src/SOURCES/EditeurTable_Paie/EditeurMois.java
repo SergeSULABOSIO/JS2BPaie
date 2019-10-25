@@ -7,7 +7,7 @@ package SOURCES.EditeurTable_Paie;
 
 import SOURCES.Utilitaires_Paie.ParametreFichesDePaie;
 import SOURCES.Utilitaires_Paie.UtilPaie;
-import Source.Objet.Exercice;
+import Source.Objet.Annee;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -42,7 +42,7 @@ public class EditeurMois extends AbstractCellEditor implements TableCellEditor {
         this.champEditionCombo.removeAllItems();
         this.champEditionCombo.addItem("");
         if (this.parametreFichesDePaie != null) {
-            Exercice Iexerc = this.parametreFichesDePaie.getExercice();
+            Annee Iexerc = this.parametreFichesDePaie.getExercice();
             if (Iexerc != null) {
                 Vector<String> listeMois = UtilPaie.getListeMois(Iexerc.getDebut(), Iexerc.getFin());
                 for (String Omois : listeMois) {

@@ -15,14 +15,13 @@ import SOURCES.Utilitaires_Paie.UtilPaie;
 import Source.Callbacks.ConstructeurCriteres;
 import Source.Callbacks.EcouteurNavigateurPages;
 import Source.Interface.InterfaceAgent;
-import Source.Interface.InterfaceExercice;
 import Source.Interface.InterfaceFiche;
 import Source.Interface.InterfaceMonnaie;
 import Source.Interface.InterfaceUtilisateur;
 import Source.Objet.Agent;
 import Source.Objet.CouleurBasique;
 import Source.Objet.Entreprise;
-import Source.Objet.Exercice;
+import Source.Objet.Annee;
 import Source.Objet.Fiche;
 import Source.Objet.Monnaie;
 import Source.Objet.UtilObjet;
@@ -34,6 +33,7 @@ import Sources.UI.JS2BPanelPropriete;
 import static java.lang.Thread.sleep;
 import java.util.Date;
 import java.util.Vector;
+import Source.Interface.InterfaceAnnee;
 
 /**
  *
@@ -45,7 +45,7 @@ public class PrincipalPaie extends javax.swing.JFrame {
      * Creates new form TEST_Principal
      */
     public Entreprise entreprise = new Entreprise(1, "ECOLE CARESIENNE DE KINSHASA", "7e Rue Limeté Industrielle, Kinshasa/RDC", "+243844803514", "infos@cartesien.org", "wwww.cartesien.org", "logo.png", "RCCM/KD/CD/4513", "IDN00111454", "IMP00124100", "Equity Bank Congo SA", "AIB RDC Sarl", "000000121212400", "IBANNN0012", "SWIFTCDK");
-    public Exercice exercice = new Exercice(12, entreprise.getId(), 1, "Année Scolaire 2019-2020", new Date(), UtilPaie.getDate_AjouterAnnee(new Date(), 1), UtilObjet.getSignature(), InterfaceExercice.BETA_EXISTANT);
+    public Annee exercice = new Annee(12, entreprise.getId(), 1, "Année Scolaire 2019-2020", new Date(), UtilPaie.getDate_AjouterAnnee(new Date(), 1), UtilObjet.getSignature(), InterfaceAnnee.BETA_EXISTANT);
     public Utilisateur utilisateur = new Utilisateur(1, entreprise.getId(), "SULA", "BOSIO", "SERGE", "sulabosiog@gmail.com", "abc", InterfaceUtilisateur.TYPE_ADMIN, UtilPaie.generateSignature(), InterfaceUtilisateur.DROIT_CONTROLER, InterfaceUtilisateur.DROIT_CONTROLER, InterfaceUtilisateur.DROIT_CONTROLER, InterfaceUtilisateur.DROIT_CONTROLER, InterfaceUtilisateur.DROIT_CONTROLER, InterfaceUtilisateur.DROIT_CONTROLER, InterfaceUtilisateur.DROIT_CONTROLER, InterfaceUtilisateur.BETA_EXISTANT);
     public Monnaie monnaie_USD = new Monnaie(20, entreprise.getId(), utilisateur.getId(), exercice.getId(), "Dollars Américains", "$", InterfaceMonnaie.NATURE_MONNAIE_ETRANGERE, 1620, UtilPaie.generateSignature(), InterfaceMonnaie.BETA_EXISTANT);
     public Monnaie monnaie_CDF = new Monnaie(21, entreprise.getId(), utilisateur.getId(), exercice.getId(), "Francs Congolais", "Fc", InterfaceMonnaie.NATURE_MONNAIE_LOCALE, 1, UtilPaie.generateSignature(), InterfaceMonnaie.BETA_EXISTANT);

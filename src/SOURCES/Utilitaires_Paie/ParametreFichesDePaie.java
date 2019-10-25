@@ -10,7 +10,7 @@ package SOURCES.Utilitaires_Paie;
 
 import Source.Objet.Agent;
 import Source.Objet.Entreprise;
-import Source.Objet.Exercice;
+import Source.Objet.Annee;
 import Source.Objet.Monnaie;
 import Source.Objet.Utilisateur;
 import java.util.Vector;
@@ -22,11 +22,11 @@ import java.util.Vector;
 public class ParametreFichesDePaie {
     public Entreprise entreprise;
     public Utilisateur utilisateur;
-    public Exercice exercice;
+    public Annee exercice;
     public Vector<Agent> agents;
     public Vector<Monnaie> monnaies;
 
-    public ParametreFichesDePaie(Utilisateur utilisateur, Entreprise entreprise, Exercice exercice, Vector<Agent> agents, Vector<Monnaie> monnaies) {
+    public ParametreFichesDePaie(Utilisateur utilisateur, Entreprise entreprise, Annee exercice, Vector<Agent> agents, Vector<Monnaie> monnaies) {
         this.entreprise = entreprise;
         this.exercice = exercice;
         this.agents = agents;
@@ -50,11 +50,11 @@ public class ParametreFichesDePaie {
         this.utilisateur = utilisateur;
     }
 
-    public Exercice getExercice() {
+    public Annee getExercice() {
         return exercice;
     }
 
-    public void setExercice(Exercice exercice) {
+    public void setExercice(Annee exercice) {
         this.exercice = exercice;
     }
 
