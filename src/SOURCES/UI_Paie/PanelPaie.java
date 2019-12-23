@@ -27,6 +27,7 @@ import SOURCES.Utilitaires_Paie.ParametreFichesDePaie;
 import SOURCES.Utilitaires_Paie.SortiesFichesDePaies;
 import SOURCES.Utilitaires_Paie.UtilPaie;
 import Source.Callbacks.EcouteurEnregistrement;
+import Source.Callbacks.EcouteurFreemium;
 import Source.Callbacks.EcouteurSuppressionElement;
 import Source.Callbacks.EcouteurUpdateClose;
 import Source.Callbacks.EcouteurValeursChangees;
@@ -44,12 +45,8 @@ import Source.Objet.Monnaie;
 import Source.Objet.UtilObjet;
 import Source.Objet.Utilisateur;
 import Source.UI.NavigateurPages;
-import com.toedter.calendar.JDateChooser;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -105,9 +102,11 @@ public class PanelPaie extends javax.swing.JPanel {
     private EcouteurActualisationPaie ecouteurActualisationPaie = null;
     private JProgressBar progress;
     private GestionEdition gestionEdition = new GestionEdition();
+    private EcouteurFreemium ef = null;
 
-    public PanelPaie(CouleurBasique couleurBasique, JProgressBar progress, JTabbedPane parent, DataPaie dataPaie, EcouteurPaie ecouteurPaie) {
+    public PanelPaie(EcouteurFreemium ef, CouleurBasique couleurBasique, JProgressBar progress, JTabbedPane parent, DataPaie dataPaie, EcouteurPaie ecouteurPaie) {
         this.initComponents();
+        this.ef = ef;
         this.progress = progress;
         this.couleurBasique = couleurBasique;
         this.dataPaie = dataPaie;
@@ -789,7 +788,7 @@ public class PanelPaie extends javax.swing.JPanel {
         menuContextuel = new MenuContextuel();
         if (dataPaie.getParametreFichesDePaie().getUtilisateur() != null) {
             Utilisateur user = dataPaie.getParametreFichesDePaie().getUtilisateur();
-            
+
             if (user.getDroitPaie() == InterfaceUtilisateur.DROIT_CONTROLER) {
                 menuContextuel.Ajouter(mEnregistrer);
                 menuContextuel.Ajouter(mAjouter);
@@ -935,15 +934,20 @@ public class PanelPaie extends javax.swing.JPanel {
     }
 
     public void imprimer() {
-        int dialogResult = JOptionPane.showConfirmDialog(this, "Etes-vous sûr de vouloir imprimer ce document?", "Avertissement", JOptionPane.YES_NO_OPTION);
-        if (dialogResult == JOptionPane.YES_OPTION) {
-            try {
-                SortiesFichesDePaies sortie = getSortiesFichesDePaies(btImprimer, mImprimer);
-                DocumentPDFPaie documentPDF = new DocumentPDFPaie(this, DocumentPDFPaie.ACTION_IMPRIMER, sortie);
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (ef != null) {
+            if (ef.onVerifie() == true) {
+                int dialogResult = JOptionPane.showConfirmDialog(this, "Etes-vous sûr de vouloir imprimer ce document?", "Avertissement", JOptionPane.YES_NO_OPTION);
+                if (dialogResult == JOptionPane.YES_OPTION) {
+                    try {
+                        SortiesFichesDePaies sortie = getSortiesFichesDePaies(btImprimer, mImprimer);
+                        DocumentPDFPaie documentPDF = new DocumentPDFPaie(this, DocumentPDFPaie.ACTION_IMPRIMER, sortie);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
+
     }
 
     public ParametreFichesDePaie getParametreFichesDePaie() {
@@ -1011,15 +1015,20 @@ public class PanelPaie extends javax.swing.JPanel {
     }
 
     public void exporterPDF() {
-        int dialogResult = JOptionPane.showConfirmDialog(this, "Voulez-vous les exporter dans un fichier PDF?", "Avertissement", JOptionPane.YES_NO_OPTION);
-        if (dialogResult == JOptionPane.YES_OPTION) {
-            try {
-                SortiesFichesDePaies sortie = getSortiesFichesDePaies(btPDF, mPDF);
-                DocumentPDFPaie docpdf = new DocumentPDFPaie(this, DocumentPDFPaie.ACTION_OUVRIR, sortie);
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (ef != null) {
+            if (ef.onVerifie() == true) {
+                int dialogResult = JOptionPane.showConfirmDialog(this, "Voulez-vous les exporter dans un fichier PDF?", "Avertissement", JOptionPane.YES_NO_OPTION);
+                if (dialogResult == JOptionPane.YES_OPTION) {
+                    try {
+                        SortiesFichesDePaies sortie = getSortiesFichesDePaies(btPDF, mPDF);
+                        DocumentPDFPaie docpdf = new DocumentPDFPaie(this, DocumentPDFPaie.ACTION_OUVRIR, sortie);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
+
     }
 
     public void actualiser() {

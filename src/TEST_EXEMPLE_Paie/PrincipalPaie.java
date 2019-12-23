@@ -13,6 +13,7 @@ import SOURCES.Utilitaires_Paie.ParametreFichesDePaie;
 import SOURCES.Utilitaires_Paie.SortiesFichesDePaies;
 import SOURCES.Utilitaires_Paie.UtilPaie;
 import Source.Callbacks.ConstructeurCriteres;
+import Source.Callbacks.EcouteurFreemium;
 import Source.Callbacks.EcouteurNavigateurPages;
 import Source.Interface.InterfaceAgent;
 import Source.Interface.InterfaceFiche;
@@ -161,7 +162,12 @@ public class PrincipalPaie extends javax.swing.JFrame {
     public void initParametres() {
         ParametreFichesDePaie parametresTresorerie = getParametres();
 
-        panel = new PanelPaie(new CouleurBasique(), null, tabPrincipal, new DataPaie(parametresTresorerie), new EcouteurPaie() {
+        panel = new PanelPaie(new EcouteurFreemium() {
+            @Override
+            public boolean onVerifie() {
+                return true;
+            }
+        }, new CouleurBasique(), null, tabPrincipal, new DataPaie(parametresTresorerie), new EcouteurPaie() {
             @Override
             public void onDetruitTout(int idExercice) {
                 System.out.println("ON DETRUIT TOUTES LES FICHES DE PAIE DE L'EXERCICE " + idExercice);
@@ -209,7 +215,7 @@ public class PrincipalPaie extends javax.swing.JFrame {
         listeFiches.removeAllElements();
         listeFiches.addElement(new Fiche(12, entreprise.getId(), utilisateur.getId(), exercice.getId(), monnaie_USD.getId(), defaultAgent.getId(), InterfaceAgent.CATEGORIE_SECONDAIRE, 2500, 120, 250, 40, 90, 35, 25, 0, 5, 100, 0, new Date(), UtilPaie.getDateFrancais_Mois(new Date()), UtilObjet.getSignature(), InterfaceAgent.BETA_EXISTANT));
     }
-    
+
     private void chercherPaies(String motCle, int taillePage, JS2BPanelPropriete criteresAvances) {
         int index = 0;
         for (Fiche ee : listeFiches) {
@@ -220,7 +226,7 @@ public class PrincipalPaie extends javax.swing.JFrame {
             index++;
         }
     }
-    
+
     public boolean checkCriteresPaie(String motCle, Object data, JS2BPanelPropriete jsbpp) {
         Fiche paie = (Fiche) data;
         boolean repMotCle = panel.search_verifier_motcle(paie, motCle);
@@ -230,7 +236,7 @@ public class PrincipalPaie extends javax.swing.JFrame {
         boolean repCategorie = false;
         boolean repMois = false;
         boolean repPeriode = false;
-                
+
         if (jsbpp != null) {
             PROPRIETE propDateA = jsbpp.getPropriete("A partir du");
             PROPRIETE propDateB = jsbpp.getPropriete("Jusqu'au");
@@ -238,13 +244,13 @@ public class PrincipalPaie extends javax.swing.JFrame {
             if (repPeriode == false) {
                 return false;
             }
-            
+
             PROPRIETE propCategorie = jsbpp.getPropriete("Catégorie d'agents");
-            repCategorie = panel.search_verifier_categorie(paie, panel.getCategorie(propCategorie.getValeurSelectionne()+""));
-            
+            repCategorie = panel.search_verifier_categorie(paie, panel.getCategorie(propCategorie.getValeurSelectionne() + ""));
+
             PROPRIETE propMois = jsbpp.getPropriete("Paie du mois de");
             repMois = panel.search_verifier_mois(paie, propMois.getValeurSelectionne() + "");
-            
+
             //System.out.println("Categorie:" + idCategorie+", Mois:" + repMois+", Periode:" + repPeriode);
         } else {
             repCategorie = true;
