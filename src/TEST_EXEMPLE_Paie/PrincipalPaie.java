@@ -167,6 +167,11 @@ public class PrincipalPaie extends javax.swing.JFrame {
             public boolean onVerifie() {
                 return true;
             }
+
+            @Override
+            public boolean onVerifieNombre(String nomTable) {
+                return true;
+            }
         }, new CouleurBasique(), null, tabPrincipal, new DataPaie(parametresTresorerie), new EcouteurPaie() {
             @Override
             public void onDetruitTout(int idExercice) {
