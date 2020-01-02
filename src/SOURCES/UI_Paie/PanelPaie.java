@@ -40,7 +40,7 @@ import Source.Interface.InterfaceUtilisateur;
 import Source.Objet.Agent;
 import Source.Objet.CouleurBasique;
 import Source.Objet.Entreprise;
-import Source.Objet.Fiche;
+import Source.Objet.Fiche_paie;
 import Source.Objet.Monnaie;
 import Source.Objet.UtilObjet;
 import Source.Objet.Utilisateur;
@@ -97,7 +97,7 @@ public class PanelPaie extends javax.swing.JPanel {
     public static final int TYPE_EXPORT_SELECTION = 1;
     public int typeExport = TYPE_EXPORT_TOUT;
     private Agent SelectedAgent = null;
-    private Fiche SelectedFichePaie = null;
+    private Fiche_paie SelectedFichePaie = null;
     private CouleurBasique couleurBasique;
     private EcouteurActualisationPaie ecouteurActualisationPaie = null;
     private JProgressBar progress;
@@ -157,7 +157,7 @@ public class PanelPaie extends javax.swing.JPanel {
         }
     }
 
-    public void setDonneesFichePaie(Fiche ficheDepaie) {
+    public void setDonneesFichePaie(Fiche_paie ficheDepaie) {
         if (modeleListeFiches != null && ficheDepaie != null) {
             modeleListeFiches.setDonneesFichePaie(ficheDepaie);
         }
@@ -197,7 +197,7 @@ public class PanelPaie extends javax.swing.JPanel {
         return -1;
     }
 
-    public boolean search_verifier_motcle(Fiche Ifiche, String motcle) {
+    public boolean search_verifier_motcle(Fiche_paie Ifiche, String motcle) {
         if (Ifiche != null) {
             if (motcle.trim().length() == 0) {
                 return true;
@@ -208,7 +208,7 @@ public class PanelPaie extends javax.swing.JPanel {
         return false;
     }
 
-    public boolean search_verifier_categorie(Fiche Ifiche, int idCategorie) {
+    public boolean search_verifier_categorie(Fiche_paie Ifiche, int idCategorie) {
         if (Ifiche != null) {
             if (idCategorie == -1) {
                 return true;
@@ -228,7 +228,7 @@ public class PanelPaie extends javax.swing.JPanel {
         return "";
     }
 
-    public boolean search_verifier_mois(Fiche Ifiche, String mois) {
+    public boolean search_verifier_mois(Fiche_paie Ifiche, String mois) {
         if (Ifiche != null) {
             if (mois.trim().equals("")) {
                 return true;
@@ -239,7 +239,7 @@ public class PanelPaie extends javax.swing.JPanel {
         return false;
     }
 
-    public boolean search_verifier_periode(Fiche Ifiche, Date dateA, Date dateB) {
+    public boolean search_verifier_periode(Fiche_paie Ifiche, Date dateA, Date dateB) {
         if (Ifiche != null) {
             boolean apresA = (Ifiche.getDateEnregistrement().after(dateA) || Ifiche.getDateEnregistrement().equals(dateA));
             boolean avantB = (Ifiche.getDateEnregistrement().before(dateB) || Ifiche.getDateEnregistrement().equals(dateB));
@@ -318,7 +318,7 @@ public class PanelPaie extends javax.swing.JPanel {
         return null;
     }
 
-    private void getMontantsMasse(Monnaie ImonnaieOutput, Fiche Ifiche) {
+    private void getMontantsMasse(Monnaie ImonnaieOutput, Fiche_paie Ifiche) {
         if (Ifiche != null && ImonnaieOutput != null) {
             if (ImonnaieOutput.getId() == Ifiche.getIdMonnaie()) {
                 totNet += UtilPaie.getNetAPayer(Ifiche);
@@ -335,7 +335,7 @@ public class PanelPaie extends javax.swing.JPanel {
         }
     }
 
-    private void getMontantsSelection(Monnaie ImonnaieOutput, Fiche Ifiche) {
+    private void getMontantsSelection(Monnaie ImonnaieOutput, Fiche_paie Ifiche) {
         if (Ifiche != null && ImonnaieOutput != null) {
             if (ImonnaieOutput.getId() == Ifiche.getIdMonnaie()) {
                 totNetSel += UtilPaie.getNetAPayer(Ifiche);
@@ -363,7 +363,7 @@ public class PanelPaie extends javax.swing.JPanel {
         Monnaie ImonnaieOutput = null;
         if (modeleListeFiches != null) {
             ImonnaieOutput = getSelectedMonnaieTotaux();
-            for (Fiche iFiche : modeleListeFiches.getListeData()) {
+            for (Fiche_paie iFiche : modeleListeFiches.getListeData()) {
                 getMontantsMasse(ImonnaieOutput, iFiche);
             }
         }
@@ -374,7 +374,7 @@ public class PanelPaie extends javax.swing.JPanel {
         for (int i = 0; i < tabLignesSelected.length; i++) {
             if (tabLignesSelected[i] != -1) {
                 if (modeleListeFiches != null) {
-                    Fiche iFiche = modeleListeFiches.getFiche(tabLignesSelected[i]);
+                    Fiche_paie iFiche = modeleListeFiches.getFiche(tabLignesSelected[i]);
                     if (iFiche != null && ImonnaieOutput != null) {
                         getMontantsSelection(ImonnaieOutput, iFiche);
                     }
@@ -530,7 +530,7 @@ public class PanelPaie extends javax.swing.JPanel {
         return SelectedAgent;
     }
 
-    public Fiche getSelectedFichePaie() {
+    public Fiche_paie getSelectedFichePaie() {
         return SelectedFichePaie;
     }
 
@@ -649,7 +649,7 @@ public class PanelPaie extends javax.swing.JPanel {
                         int beta = InterfaceFiche.BETA_NOUVEAU;
                         String mois = UtilPaie.getDateFrancais_Mois(dateEnreg);
 
-                        modeleListeFiches.AjouterFichet(new Fiche(id, idEntreprise, idUtilisateur, idExercice, idMonnaie, idAgent, InterfaceAgent.CATEGORIE_ADMINISTRATION_1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dateEnreg, mois, UtilObjet.getSignature(), beta));
+                        modeleListeFiches.AjouterFichet(new Fiche_paie(id, idEntreprise, idUtilisateur, idExercice, idMonnaie, idAgent, InterfaceAgent.CATEGORIE_ADMINISTRATION_1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dateEnreg, mois, UtilObjet.getSignature(), beta));
                         //On sélectionne la première ligne
                         tableListeFichesDePaie.setRowSelectionInterval(0, 0);
                     }
@@ -907,7 +907,7 @@ public class PanelPaie extends javax.swing.JPanel {
     private boolean mustBeSaved() {
         boolean rep = false;
         //On vérifie dans la liste d'encaissements
-        for (Fiche Ienc : modeleListeFiches.getListeData()) {
+        for (Fiche_paie Ienc : modeleListeFiches.getListeData()) {
             if (Ienc.getBeta() == InterfaceFiche.BETA_MODIFIE || Ienc.getBeta() == InterfaceFiche.BETA_NOUVEAU) {
                 rep = true;
             }

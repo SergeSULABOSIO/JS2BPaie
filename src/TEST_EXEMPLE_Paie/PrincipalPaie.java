@@ -23,7 +23,7 @@ import Source.Objet.Agent;
 import Source.Objet.CouleurBasique;
 import Source.Objet.Entreprise;
 import Source.Objet.Annee;
-import Source.Objet.Fiche;
+import Source.Objet.Fiche_paie;
 import Source.Objet.Monnaie;
 import Source.Objet.UtilObjet;
 import Source.Objet.Utilisateur;
@@ -55,7 +55,7 @@ public class PrincipalPaie extends javax.swing.JFrame {
     public Vector<Monnaie> monnaies = new Vector<>();
     public Vector<Agent> agents = new Vector<>();
 
-    public Vector<Fiche> listeFiches = new Vector<>();
+    public Vector<Fiche_paie> listeFiches = new Vector<>();
 
     public PanelPaie panel = null;
 
@@ -218,12 +218,12 @@ public class PrincipalPaie extends javax.swing.JFrame {
 
     public void initDonnees() {
         listeFiches.removeAllElements();
-        listeFiches.addElement(new Fiche(12, entreprise.getId(), utilisateur.getId(), exercice.getId(), monnaie_USD.getId(), defaultAgent.getId(), InterfaceAgent.CATEGORIE_SECONDAIRE, 2500, 120, 250, 40, 90, 35, 25, 0, 5, 100, 0, new Date(), UtilPaie.getDateFrancais_Mois(new Date()), UtilObjet.getSignature(), InterfaceAgent.BETA_EXISTANT));
+        listeFiches.addElement(new Fiche_paie(12, entreprise.getId(), utilisateur.getId(), exercice.getId(), monnaie_USD.getId(), defaultAgent.getId(), InterfaceAgent.CATEGORIE_SECONDAIRE, 2500, 120, 250, 40, 90, 35, 25, 0, 5, 100, 0, new Date(), UtilPaie.getDateFrancais_Mois(new Date()), UtilObjet.getSignature(), InterfaceAgent.BETA_EXISTANT));
     }
 
     private void chercherPaies(String motCle, int taillePage, JS2BPanelPropriete criteresAvances) {
         int index = 0;
-        for (Fiche ee : listeFiches) {
+        for (Fiche_paie ee : listeFiches) {
             if (index == taillePage) {
                 break;
             }
@@ -233,7 +233,7 @@ public class PrincipalPaie extends javax.swing.JFrame {
     }
 
     public boolean checkCriteresPaie(String motCle, Object data, JS2BPanelPropriete jsbpp) {
-        Fiche paie = (Fiche) data;
+        Fiche_paie paie = (Fiche_paie) data;
         boolean repMotCle = panel.search_verifier_motcle(paie, motCle);
         if (repMotCle == false) {
             return false;

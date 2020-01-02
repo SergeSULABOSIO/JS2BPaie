@@ -20,7 +20,7 @@ import Source.Interface.InterfaceAgent;
 import Source.Interface.InterfaceFiche;
 import Source.Objet.Agent;
 import Source.Objet.CouleurBasique;
-import Source.Objet.Fiche;
+import Source.Objet.Fiche_paie;
 import Source.Objet.Monnaie;
 import Source.UI.CelluleTableauSimple;
 import java.util.Date;
@@ -94,7 +94,7 @@ public class RenduTableFiche implements TableCellRenderer {
         
         ImageIcon icone = null;
         if(gestionEdition != null){
-            Fiche agent = this.modeleListeFiches.getFiche(row);
+            Fiche_paie agent = this.modeleListeFiches.getFiche(row);
             if(agent != null){
                 if(gestionEdition.isEditable(agent.getId(), 0)){
                     icone = iconeEdition;
@@ -172,7 +172,7 @@ public class RenduTableFiche implements TableCellRenderer {
     
     private String getMonnaieRow(int row) {
         if (this.modeleListeFiches != null && this.parametreFichesDePaie != null) {
-            Fiche Ific = this.modeleListeFiches.getFiche(row);
+            Fiche_paie Ific = this.modeleListeFiches.getFiche(row);
             if (Ific != null) {
                 return getMonnaie(Ific.getIdMonnaie());
             }else{
@@ -186,7 +186,7 @@ public class RenduTableFiche implements TableCellRenderer {
     
     private int getBeta(int row) {
         if (this.modeleListeFiches != null) {
-            Fiche Ific = this.modeleListeFiches.getFiche(row);
+            Fiche_paie Ific = this.modeleListeFiches.getFiche(row);
             if (Ific != null) {
                 return Ific.getBeta();
             }

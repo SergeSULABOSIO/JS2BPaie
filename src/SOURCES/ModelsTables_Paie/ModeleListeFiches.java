@@ -16,7 +16,7 @@ import Source.Interface.InterfaceFiche;
 import Source.Objet.Agent;
 import Source.Objet.CouleurBasique;
 import Source.Objet.Encaissement;
-import Source.Objet.Fiche;
+import Source.Objet.Fiche_paie;
 import java.util.Date;
 import java.util.Vector;
 import javax.swing.JOptionPane;
@@ -31,8 +31,8 @@ import javax.swing.table.AbstractTableModel;
 public class ModeleListeFiches extends AbstractTableModel {
 
     private String[] titreColonnes = {"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Impôt", "Séc. Sociale", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
-    private Vector<Fiche> listeData = new Vector<>();
-    private Vector<Fiche> listeDataExclus = new Vector<>();
+    private Vector<Fiche_paie> listeData = new Vector<>();
+    private Vector<Fiche_paie> listeDataExclus = new Vector<>();
     private JScrollPane parent;
     private EcouteurValeursChangees ecouteurModele;
     private Bouton btEnreg;
@@ -62,14 +62,14 @@ public class ModeleListeFiches extends AbstractTableModel {
         redessinerTable();
     }
 
-    public void setListeFiches(Vector<Fiche> listeData) {
+    public void setListeFiches(Vector<Fiche_paie> listeData) {
         this.listeData = listeData;
         redessinerTable();
     }
 
-    public Fiche getFiche(int row) {
+    public Fiche_paie getFiche(int row) {
         if (row < listeData.size() && row != -1) {
-            Fiche art = listeData.elementAt(row);
+            Fiche_paie art = listeData.elementAt(row);
             if (art != null) {
                 return art;
             } else {
@@ -80,9 +80,9 @@ public class ModeleListeFiches extends AbstractTableModel {
         }
     }
 
-    public Fiche getFiche_id(int id) {
+    public Fiche_paie getFiche_id(int id) {
         if (id != -1) {
-            for (Fiche art : listeData) {
+            for (Fiche_paie art : listeData) {
                 if (id == art.getId()) {
                     return art;
                 }
@@ -91,7 +91,7 @@ public class ModeleListeFiches extends AbstractTableModel {
         return null;
     }
 
-    public void setDonneesFichePaie(Fiche fiche) {
+    public void setDonneesFichePaie(Fiche_paie fiche) {
         if (progress != null) {
             progress.setVisible(true);
             progress.setIndeterminate(true);
@@ -104,7 +104,7 @@ public class ModeleListeFiches extends AbstractTableModel {
         }
     }
 
-    public Vector<Fiche> getListeData() {
+    public Vector<Fiche_paie> getListeData() {
         return this.listeData;
     }
 
@@ -112,7 +112,7 @@ public class ModeleListeFiches extends AbstractTableModel {
         redessinerTable();
     }
 
-    public void AjouterFichet(Fiche newFiche) {
+    public void AjouterFichet(Fiche_paie newFiche) {
         this.listeData.add(0, newFiche);
         mEnreg.setCouleur(couleurBasique.getCouleur_foreground_objet_nouveau());                                        //mEnreg.setCouleur(Color.blue);
         btEnreg.setForeground(couleurBasique.getCouleur_foreground_objet_nouveau());                                   //btEnreg.setForeground(Color.blue);
@@ -121,7 +121,7 @@ public class ModeleListeFiches extends AbstractTableModel {
 
     public void SupprimerFiche(int row, EcouteurSuppressionElement ecouteurSuppressionElement) {
         if (row < listeData.size() && row != -1) {
-            Fiche articl = listeData.elementAt(row);
+            Fiche_paie articl = listeData.elementAt(row);
             if (articl != null) {
                 int idASUpp = articl.getId();
                 int dialogResult = JOptionPane.showConfirmDialog(parent, "Etes-vous sûr de vouloir supprimer cette liste?", "Avertissement", JOptionPane.YES_NO_OPTION);
@@ -169,7 +169,7 @@ public class ModeleListeFiches extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
-        Fiche Ifiche = listeData.elementAt(rowIndex);
+        Fiche_paie Ifiche = listeData.elementAt(rowIndex);
         switch (columnIndex) {
             case 0: //N°
                 return (rowIndex + 1) + "";
@@ -267,7 +267,7 @@ public class ModeleListeFiches extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        Fiche eleve = null;
+        Fiche_paie eleve = null;
         boolean canEdit = false;
         if (listeData.size() > rowIndex) {
             eleve = listeData.elementAt(rowIndex);
@@ -285,7 +285,7 @@ public class ModeleListeFiches extends AbstractTableModel {
         }
     }
 
-    private void updateCategorieAgent(Fiche Ifiche) {
+    private void updateCategorieAgent(Fiche_paie Ifiche) {
         if (Ifiche != null) {
             for (Agent Iagent : this.parametreFichesDePaie.getAgents()) {
                 if (Ifiche.getIdAgent() == Iagent.getId()) {
@@ -298,7 +298,7 @@ public class ModeleListeFiches extends AbstractTableModel {
 
     private boolean isThisPaieAlreadyExists(String mois, int idAgentNew) {
         boolean rep = false;
-        for (Fiche iFiche : listeData) {
+        for (Fiche_paie iFiche : listeData) {
             if (iFiche.getIdAgent() == idAgentNew && mois.equals(iFiche.getMois())) {
                 return true;
             }
@@ -309,7 +309,7 @@ public class ModeleListeFiches extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         //{"N°", "Date", "Mois", "Agent", "Catégorie", "Monnaie", "Sal. de Base", "Transport", "Logement", "Autres gains", "TOTAL BRUT", "Ipr", "Inss", "Syndicat", "Absence", "Cafétariat", "Av. Salaire", "Ordinateur", "TOTAL RETENUS", "NET A PAYER"};
-        Fiche Ifiche = listeData.get(rowIndex);
+        Fiche_paie Ifiche = listeData.get(rowIndex);
         String avant = Ifiche.toString();
         switch (columnIndex) {
             case 1://Date

@@ -13,7 +13,7 @@ import Source.Interface.InterfaceAgent;
 import Source.Interface.InterfaceFiche;
 import Source.Objet.Agent;
 import Source.Objet.Entreprise;
-import Source.Objet.Fiche;
+import Source.Objet.Fiche_paie;
 import Source.Objet.Monnaie;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -490,7 +490,7 @@ public class DocumentPDFPaie extends PdfPageEventHelper {
         double totB = 0, totR = 0, totN = 0;
         boolean isEmpty = true;
 
-        for (Fiche Ifiche : sortiesFichesDePaies.getListeFichesDePaie()) {
+        for (Fiche_paie Ifiche : sortiesFichesDePaies.getListeFichesDePaie()) {
             if (Ifiche.getCategorieAgent() == categorie && mois.equals(Ifiche.getMois())) {
                 totB += UtilPaie.getTotalAPayer(Ifiche);
                 totR += UtilPaie.getTotalRetenu(Ifiche);
@@ -630,7 +630,7 @@ public class DocumentPDFPaie extends PdfPageEventHelper {
             );
             if (gestionnairePaie != null) {
                 Agent AgentSeleted = gestionnairePaie.getSelectedAgent();
-                Fiche FicheDePaieSelected = gestionnairePaie.getSelectedFichePaie();
+                Fiche_paie FicheDePaieSelected = gestionnairePaie.getSelectedFichePaie();
                 
                 if (FicheDePaieSelected != null && AgentSeleted != null) {
                     String monnaieFiche = getMonnaieNom(FicheDePaieSelected.getIdMonnaie());
@@ -649,7 +649,7 @@ public class DocumentPDFPaie extends PdfPageEventHelper {
         }
     }
 
-    private void setDataPaieAgent(PdfPTable tableau, float borderwidth, Fiche fichePaie) {
+    private void setDataPaieAgent(PdfPTable tableau, float borderwidth, Fiche_paie fichePaie) {
         String monnaie = getMonnaie(fichePaie.getIdMonnaie());
         //Date
         tableau.addCell(getCelluleTableau("Date de production", borderwidth, BaseColor.WHITE, null, Element.ALIGN_LEFT, Font_TexteSimple));

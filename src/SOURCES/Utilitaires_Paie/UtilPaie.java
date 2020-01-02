@@ -7,7 +7,7 @@ package SOURCES.Utilitaires_Paie;
 
 
 import Source.Interface.InterfaceFiche;
-import Source.Objet.Fiche;
+import Source.Objet.Fiche_paie;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -57,7 +57,7 @@ public class UtilPaie {
         return texte;
     }
     
-    public static double getTotalAPayer(Fiche Ifiche){
+    public static double getTotalAPayer(Fiche_paie Ifiche){
         if(Ifiche != null){
             return (Ifiche.getSalaireBase() + Ifiche.getTransport() + Ifiche.getLogement() + Ifiche.getAutresGains());
         }else{
@@ -65,7 +65,7 @@ public class UtilPaie {
         }
     }
     
-    public static double getTotalRetenu(Fiche Ifiche){
+    public static double getTotalRetenu(Fiche_paie Ifiche){
         if(Ifiche != null){
             return (Ifiche.getRetenu_IPR() + Ifiche.getRetenu_INSS()+ Ifiche.getRetenu_SYNDICAT() + Ifiche.getRetenu_ABSENCE()+ Ifiche.getRetenu_CAFETARIAT() + Ifiche.getRetenu_AVANCE_SALAIRE() + Ifiche.getRetenu_ORDINATEUR());
         }else{
@@ -73,7 +73,7 @@ public class UtilPaie {
         }
     }
     
-    public static double getNetAPayer(Fiche Ifiche){
+    public static double getNetAPayer(Fiche_paie Ifiche){
         return getTotalAPayer(Ifiche) - getTotalRetenu(Ifiche);
     }
 

@@ -7,7 +7,7 @@ package SOURCES.Utilitaires_Paie;
 
 
 
-import Source.Objet.Fiche;
+import Source.Objet.Fiche_paie;
 import java.util.Vector;
 
 /**
@@ -15,17 +15,17 @@ import java.util.Vector;
  * @author HP Pavilion
  */
 public class DonneesFicheDePaie {
-    public Vector<Fiche> fiches;
+    public Vector<Fiche_paie> fiches;
 
-    public DonneesFicheDePaie(Vector<Fiche> fiches) {
+    public DonneesFicheDePaie(Vector<Fiche_paie> fiches) {
         this.fiches = fiches;
     }
 
-    public Vector<Fiche> getFiches() {
+    public Vector<Fiche_paie> getFiches() {
         return fiches;
     }
 
-    public void setFiches(Vector<Fiche> fiches) {
+    public void setFiches(Vector<Fiche_paie> fiches) {
         this.fiches = fiches;
     }
 

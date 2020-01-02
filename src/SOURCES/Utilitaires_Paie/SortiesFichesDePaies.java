@@ -8,7 +8,7 @@ package SOURCES.Utilitaires_Paie;
 
 import Source.Callbacks.EcouteurEnregistrement;
 import Source.Interface.InterfaceFiche;
-import Source.Objet.Fiche;
+import Source.Objet.Fiche_paie;
 import java.util.Vector;
 
 /**
@@ -18,9 +18,9 @@ import java.util.Vector;
 
 public class SortiesFichesDePaies {
     private EcouteurEnregistrement ecouteurEnregistrement;
-    private Vector<Fiche> listeFichesDePaie;
+    private Vector<Fiche_paie> listeFichesDePaie;
 
-    public SortiesFichesDePaies(EcouteurEnregistrement ecouteurEnregistrement, Vector<Fiche> listeFichesDePaie) {
+    public SortiesFichesDePaies(EcouteurEnregistrement ecouteurEnregistrement, Vector<Fiche_paie> listeFichesDePaie) {
         this.ecouteurEnregistrement = ecouteurEnregistrement;
         this.listeFichesDePaie = listeFichesDePaie;
     }
@@ -33,11 +33,11 @@ public class SortiesFichesDePaies {
         this.ecouteurEnregistrement = ecouteurEnregistrement;
     }
 
-    public Vector<Fiche> getListeFichesDePaie() {
+    public Vector<Fiche_paie> getListeFichesDePaie() {
         return listeFichesDePaie;
     }
 
-    public void setListeFichesDePaie(Vector<Fiche> listeFichesDePaie) {
+    public void setListeFichesDePaie(Vector<Fiche_paie> listeFichesDePaie) {
         this.listeFichesDePaie = listeFichesDePaie;
     }
 
