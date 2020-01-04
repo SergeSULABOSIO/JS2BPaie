@@ -213,6 +213,11 @@ public class PrincipalPaie extends javax.swing.JFrame {
                 th.start();
 
             }
+
+            @Override
+            public void onClosed() {
+                
+            }
         });
     }
 

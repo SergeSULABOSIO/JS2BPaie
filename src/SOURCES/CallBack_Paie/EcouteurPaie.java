@@ -16,7 +16,7 @@ public abstract class EcouteurPaie {
     public abstract void onEnregistre(SortiesFichesDePaies sortiesTresorerie);
     public abstract void onDetruitTout(int idExercice);
     public abstract void onDetruitElement(int idElement, long signature);
-    
+    public abstract void onClosed();
 }
 
 
