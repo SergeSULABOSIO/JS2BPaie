@@ -124,16 +124,17 @@ public class ModeleListeFiches extends AbstractTableModel {
             Fiche_paie articl = listeData.elementAt(row);
             if (articl != null) {
                 int idASUpp = articl.getId();
-                int dialogResult = JOptionPane.showConfirmDialog(parent, "Etes-vous sûr de vouloir supprimer cette liste?", "Avertissement", JOptionPane.YES_NO_OPTION);
-                if (dialogResult == JOptionPane.YES_OPTION) {
-                    if (row <= listeData.size()) {
-                        this.listeData.removeElementAt(row);
-                    }
-                    redessinerTable();
-                    if (ecouteurSuppressionElement != null) {
-                        ecouteurSuppressionElement.onSuppressionConfirmee(idASUpp, articl.getSignature());
+                if (ecouteurSuppressionElement.onCanDelete(idASUpp, articl.getSignature()) == true) {
+                    int dialogResult = JOptionPane.showConfirmDialog(parent, "Etes-vous sûr de vouloir supprimer cette liste?", "Avertissement", JOptionPane.YES_NO_OPTION);
+                    if (dialogResult == JOptionPane.YES_OPTION) {
+                        if (row <= listeData.size()) {
+                            this.listeData.removeElementAt(row);
+                        }
+                        redessinerTable();
+                        ecouteurSuppressionElement.onDeletionComplete(idASUpp, articl.getSignature());
                     }
                 }
+
             }
         }
     }
@@ -380,5 +381,3 @@ public class ModeleListeFiches extends AbstractTableModel {
     }
 
 }
-
-

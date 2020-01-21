@@ -680,9 +680,15 @@ public class PanelPaie extends javax.swing.JPanel {
         switch (indexTabSelected) {
             case 0: //Tab Encaissement
                 modeleListeFiches.SupprimerFiche(tableListeFichesDePaie.getSelectedRow(), new EcouteurSuppressionElement() {
+
                     @Override
-                    public void onSuppressionConfirmee(int idElement, long signature) {
+                    public void onDeletionComplete(int idElement, long signature) {
                         ecouteurPaie.onDetruitElement(idElement, signature);
+                    }
+
+                    @Override
+                    public boolean onCanDelete(int idElement, long signature) {
+                        return ecouteurPaie.onCanDelete(idElement, signature);
                     }
                 });
                 break;
@@ -921,12 +927,12 @@ public class PanelPaie extends javax.swing.JPanel {
             int dialogResult = JOptionPane.showConfirmDialog(this, "Voulez-vous enregistrer les modifications et/ou ajouts apportés à ces données?", "Avertissement", JOptionPane.YES_NO_CANCEL_OPTION);
             if (dialogResult == JOptionPane.YES_OPTION) {
                 this.ecouteurPaie.onEnregistre(getSortiesFichesDePaies(btEnregistrer, mEnregistrer));
-                if(ecouteurPaie != null){
+                if (ecouteurPaie != null) {
                     ecouteurPaie.onClosed();
                 }
                 this.ecouteurClose.onFermer();
             } else if (dialogResult == JOptionPane.NO_OPTION) {
-                if(ecouteurPaie != null){
+                if (ecouteurPaie != null) {
                     ecouteurPaie.onClosed();
                 }
                 this.ecouteurClose.onFermer();
@@ -934,7 +940,7 @@ public class PanelPaie extends javax.swing.JPanel {
         } else {
             int dialogResult = JOptionPane.showConfirmDialog(this, "Etes-vous sûr de vouloir fermer cette fenêtre?", "Avertissement", JOptionPane.YES_NO_OPTION);
             if (dialogResult == JOptionPane.YES_OPTION) {
-                if(ecouteurPaie != null){
+                if (ecouteurPaie != null) {
                     ecouteurPaie.onClosed();
                 }
                 this.ecouteurClose.onFermer();

@@ -218,6 +218,11 @@ public class PrincipalPaie extends javax.swing.JFrame {
             public void onClosed() {
                 
             }
+
+            @Override
+            public boolean onCanDelete(int idElement, long signature) {
+                return true;
+            }
         });
     }
 
